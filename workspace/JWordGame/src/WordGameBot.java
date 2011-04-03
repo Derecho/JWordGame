@@ -36,7 +36,7 @@ public class WordGameBot extends PircBot {
 			break;
 		case WGHELP:
 			sendMessage(channel, sender + ": Type !wgsignup to signup for the wordgame.");
-			sendMessage(channel, sender + ": Other available commands: !wgpoints , and PM-only: !wgset !wglistwords");
+			sendMessage(channel, sender + ": Other available commands: !wgpoints !wgstatus, and PM-only: !wgset !wglistwords");
 			break;
 		case WGSIGNUP:
 			WGSignup(channel, sender, login, hostname);
@@ -44,6 +44,9 @@ public class WordGameBot extends PircBot {
 		case WGPOINTS:
 			if(user != null) { WGPoints(channel, user);	}
 			else { tellNotRegistered(channel, sender);	}
+			break;
+		case WGSTATUS:
+			WGStatus(channel, sender);
 			break;
 		case WGSET:
 		case WGLISTWORDS:
@@ -136,6 +139,28 @@ public class WordGameBot extends PircBot {
 	
 	public void WGPoints(String channel, User user) {
 		sendMessage(channel, user.nick + ": You have " + user.points + " points.");
+	}
+	
+	public void WGStatus(String channel, String sender) {
+		Integer setwords = 0;
+		String availablewords = new String();
+		
+		Game game;
+		game = games.get(getServer() + " " + channel);
+		
+		if(game == null) {
+			sendMessage(channel, sender + ": There is no game in progress on this channel (yet).");
+			return;
+		}
+		
+		for(User user : game.users) {
+			setwords += user.words.size();
+			if(user.wordsLeft > 0) {
+				availablewords += user.nick + " (" + user.wordsLeft + ") ";
+			}
+		}
+		
+		sendMessage(channel, sender + ": " + setwords + " words have been set. The following users can set words: " + availablewords);
 	}
 	
 	public void WGSet(String sender, String login, String hostname, Command command) {
