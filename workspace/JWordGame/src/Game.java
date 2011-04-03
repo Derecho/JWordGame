@@ -7,9 +7,12 @@ import java.util.Set;
 public class Game {
 	
 	Set<User> users;
+	Integer maxpoints, maxwords;
 	
 	public Game() {
 		users = new HashSet<User>();
+		maxpoints = 10; // Maximum amount of points that is rewarded to a guesser.
+		maxwords = 2; // Maximum amount of words that can be set by a user.
 	}
 	
 	public boolean addUser(User newuser) {
@@ -31,6 +34,13 @@ public class Game {
 			}
 		}
 		return null;
+	}
+	
+	public Integer calcReward(Integer mentions) {
+		// Returns the amount of points to be rewarded to the guesser of the word.
+		// This depends on the amount of mentions the original user had.
+		// This should be changable somehow.
+		return (int)(maxpoints / (mentions/1.5 + 1));
 	}
 	
 }

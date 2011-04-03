@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.Random;
 
 import org.jibble.pircbot.*;
 
@@ -14,6 +15,8 @@ public class WordGameBot extends PircBot {
 		adminpass = null;
 		
 		setName("JWG");
+		setLogin("JWordGame");
+		setVersion("JWordGame BETA by Derecho.");
 	}
 	
 	// Inherited methods
@@ -67,7 +70,45 @@ public class WordGameBot extends PircBot {
 							user.words.put(word, user.words.get(word) + 1);
 						}
 						else {
-							sendMessage(channel, sender + ": Congratiulations! You have guessed the word '" + word + "'!");
+							sendMessage(channel, sender + ": Congratiulations! You have guessed the word '" + word + "' set by " + otheruser.nick + "!");
+							
+							// Give the guesser a reward
+							user.points += game.calcReward(otheruser.words.get(word));
+							
+							// Give the setter a reward
+							if(otheruser.words.get(word) < 10) {
+								otheruser.points += otheruser.words.get(word);
+							}
+							else {
+								otheruser.points += 10;
+							}
+							
+							// Remove the word from the setter
+							otheruser.words.remove(word);
+							
+							// Assign word to guesser or random person
+							//DEBUG
+							System.out.println("Words left for " + user.nick + ": " + user.wordsLeft);
+							if(user.wordsLeft <= game.maxwords) {
+								//DEBUG
+								System.out.println("Yay he receives a word.");
+								user.wordsLeft++;
+							}
+							else {
+								sendMessage(channel, sender + ": Uh oh! You seem to have reached the maximum amount of unset words." +
+										" Your unset word will now be randomly be given to someone.");
+								
+								// TODO Make a much more efficient method for the below code.
+								Random generator = new Random();
+								Integer randomint = generator.nextInt();
+								Integer i = 0;
+								for(User randomuser : game.users) {
+									if(i == randomint) {
+										randomuser.wordsLeft++;
+										break;
+									}
+								}
+							}
 						}
 					}
 				}
@@ -114,6 +155,29 @@ public class WordGameBot extends PircBot {
 		}
 	}
 	
+	public void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
+		// Autojoin on kick
+		if(recipientNick.equalsIgnoreCase(getNick())) {
+			joinChannel(channel);
+		}
+	}
+	
+	public void onDisconnect() {
+		// Autoreconnect with 30 second pauses between retries.
+		while(!isConnected()) {
+			try {
+				reconnect();
+			}
+			catch(Exception e1) {
+				try {
+					Thread.sleep(30000);
+				} catch (Exception e2) {
+					// Do nothing.
+				}
+			}
+		}
+	}
+	
 	// Own methods
 	
 	public User getUser(String channel, String sender, String login, String hostname) {
@@ -138,6 +202,10 @@ public class WordGameBot extends PircBot {
 	public void tellNotRegisteredPM(String sender) {
 		sendMessage(sender, "You do not seem to have an account on that channel yet, or you have not signed in properly." +
 				" Use !wgsignup in the channel to sign up for an account");
+	}
+	
+	public boolean isAdmin(String sender, String login, String hostname) {
+		return (sender.equals(admindetails.get("nick")) && login.equals(admindetails.get("login")) && hostname.equals(admindetails.get("hostname")));
 	}
 	
 	// User commands
@@ -182,7 +250,10 @@ public class WordGameBot extends PircBot {
 			}
 		}
 		
-		sendMessage(channel, sender + ": " + setwords + " words have been set. The following users can set words: " + availablewords);
+		sendMessage(channel, sender + ": " + setwords + " words have been set.");
+		if(!"".equals(availablewords)) {
+			sendMessage(channel, sender + ": The following users can set words: " + availablewords);
+		}
 	}
 	
 	public void WGSet(String sender, String login, String hostname, Command command) {
@@ -251,10 +322,6 @@ public class WordGameBot extends PircBot {
 				sendMessage(sender, "WGADMIN usage: !wgadmin <password>");
 			}
 		}
-	}
-	
-	public boolean isAdmin(String sender, String login, String hostname) {
-		return (sender.equals(admindetails.get("nick")) && login.equals(admindetails.get("login")) && hostname.equals(admindetails.get("hostname")));
 	}
 	
 	public void WGJoin(String sender, Command command) {
