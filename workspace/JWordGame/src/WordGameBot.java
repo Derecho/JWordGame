@@ -53,6 +53,26 @@ public class WordGameBot extends PircBot {
 			sendMessage(channel, sender + ": You can only do this in a PM.");
 			break;
 		}
+		
+		// Now, let's see if a set word was mentioned (by a signed-up user)
+		if(user != null) {
+			// Since the previously acquired user exists, the game must also exist, and no error checking is needed.
+			Game game;
+			game = games.get(getServer() + " " + channel);
+			
+			for(User otheruser : game.users) {				
+				for(String word : otheruser.words.keySet()) {
+					if(message.contains(word)) {
+						if(user.equals(otheruser)) {
+							user.words.put(word, user.words.get(word) + 1);
+						}
+						else {
+							sendMessage(channel, sender + ": Congratiulations! You have guessed the word '" + word + "'!");
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	public void onPrivateMessage(String sender, String login, String hostname, String message) {
@@ -68,7 +88,9 @@ public class WordGameBot extends PircBot {
 			break;
 		case WGADMIN:
 			WGAdmin(sender, login, hostname, command);
-			break;		
+			break;
+		// TODO add a WGLOGIN command, for when someone's nickname, loginname or hostname has changes.
+		// This would probably work with a password.
 		}
 		
 		if(isAdmin(sender, login, hostname)) {
