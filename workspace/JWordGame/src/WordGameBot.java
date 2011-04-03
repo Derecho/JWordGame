@@ -36,7 +36,7 @@ public class WordGameBot extends PircBot {
 			break;
 		case WGHELP:
 			sendMessage(channel, sender + ": Type !wgsignup to signup for the wordgame.");
-			sendMessage(channel, sender + ": Other available commands: !wgpoints");
+			sendMessage(channel, sender + ": Other available commands: !wgpoints , and PM-only: !wgset !wglistwords");
 			break;
 		case WGSIGNUP:
 			WGSignup(channel, sender, login, hostname);
@@ -58,7 +58,11 @@ public class WordGameBot extends PircBot {
 		
 		switch(command.command) {
 		case WGSET:
-			
+			WGSet(sender, login, hostname, command);
+			break;
+		case WGLISTWORDS:
+			WGListWords(sender, login, hostname, command);
+			break;
 		case WGADMIN:
 			WGAdmin(sender, login, hostname, command);
 			break;		
@@ -66,6 +70,9 @@ public class WordGameBot extends PircBot {
 		
 		if(isAdmin(sender, login, hostname)) {
 			switch(command.command) {
+			case WGADMINHELP:
+				sendMessage(sender, "Available commands: !wgjoin, !wgnewgame, !wglistgames, !wggiveword");
+				break;
 			case WGJOIN:
 				WGJoin(sender, command);
 				break;
@@ -74,6 +81,9 @@ public class WordGameBot extends PircBot {
 				break;
 			case WGLISTGAMES:
 				WGListGames(sender);
+				break;
+			case WGGIVEWORD:
+				WGGiveWord(sender, command);
 				break;
 			}
 		}
@@ -100,6 +110,11 @@ public class WordGameBot extends PircBot {
 				" Use !wgsignup to sign up for an account.");
 	}
 	
+	public void tellNotRegisteredPM(String sender) {
+		sendMessage(sender, "You do not seem to have an account on that channel yet, or you have not signed in properly." +
+				" Use !wgsignup in the channel to sign up for an account");
+	}
+	
 	// User commands
 	
 	public void WGSignup(String channel, String sender, String login, String hostname) {		
@@ -121,6 +136,43 @@ public class WordGameBot extends PircBot {
 	
 	public void WGPoints(String channel, User user) {
 		sendMessage(channel, user.nick + ": You have " + user.points + " points.");
+	}
+	
+	public void WGSet(String sender, String login, String hostname, Command command) {
+		if(command.arguments.length == 3) {
+			User user;
+			user = getUser(command.arguments[1], sender, login, hostname);
+			if(user == null) {
+				tellNotRegisteredPM(sender);
+			}
+			else {
+				if(user.setWord(command.arguments[2])) {
+					sendMessage(sender, "Word set.");
+				}
+				else {
+					sendMessage(sender, "You cannot set any words.");
+				}
+			}
+		}
+		else {
+			sendMessage(sender, "WGSET usage: !wgset <#channel> <word>");
+		}
+	}
+	
+	public void WGListWords(String sender, String login, String hostname, Command command) {
+		if(command.arguments.length == 2) {
+			User user;
+			user = getUser(command.arguments[1], sender, login, hostname);
+			if(user == null) {
+				tellNotRegisteredPM(sender);
+			}
+			else {
+				sendMessage(sender, user.listWords());
+			}
+		}
+		else {
+			sendMessage(sender, "WGLISTWORDS usage: !wglistwords <#channel>");
+		}
 	}
 	
 	// Admin commands
@@ -184,7 +236,41 @@ public class WordGameBot extends PircBot {
 	
 	public void WGListGames(String sender) {
 		for(String servchan : games.keySet()) {
-			sendMessage(sender, servchan + " " +Integer.toHexString(System.identityHashCode(games.get(servchan))));
+			sendMessage(sender, servchan + " " + Integer.toHexString(System.identityHashCode(games.get(servchan))));
+		}
+	}
+	
+	public void WGGiveWord(String sender, Command command) {
+		boolean gamefound, userfound;
+		gamefound = false;
+		userfound = false;
+		
+		// TODO It seems to me that the nested if and for loops below could be written somewhat cleaner.
+		if(command.arguments.length == 3) {
+			for(String servchan : games.keySet()) {
+				if(command.arguments[1].equals(Integer.toHexString(System.identityHashCode(games.get(servchan))))) {
+					// We found the right game, now let's find the user
+					gamefound = true;
+					for(User user : games.get(servchan).users) {
+						if(command.arguments[2].equals(user.nick)) {
+							// We found the right user
+							userfound = true;
+							user.wordsLeft++;
+							sendMessage(sender, "1 Word given to " + user.nick + " on: " + servchan);
+						}
+					}
+					if(!userfound) {
+						sendMessage(sender, "No such user could be found.");
+					}
+				}
+			}
+			if(!gamefound) {
+				sendMessage(sender, "No such game could be found.");
+			}
+		}
+		else {
+			sendMessage(sender, "WGGIVEWORD usage: !wggiveword <gameid> <user>");
+			sendMessage(sender, "Use !wglistgames to find the gameid.");
 		}
 	}
 }

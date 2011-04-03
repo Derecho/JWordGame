@@ -31,6 +31,10 @@ public class User {
 	public String listWords() {
 		String returnstr = new String();
 		
+		if(words.isEmpty()) {
+			return "You haven't set any words.";
+		}
+		
 		for(String word : words.keySet()) {
 			returnstr = returnstr + word + " (" + words.get(word) + ") ";
 		}

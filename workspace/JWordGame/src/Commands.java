@@ -2,7 +2,7 @@
 public enum Commands {
 	
 	// All enum names
-	WG, WGHELP, WGSIGNUP, WGPOINTS, WGSET, WGLISTWORDS, WGADMIN, WGJOIN, WGNEWGAME, WGLISTGAMES, UNKNOWN, NOCOMMAND;
+	WG, WGHELP, WGSIGNUP, WGPOINTS, WGSET, WGLISTWORDS, WGADMIN, WGADMINHELP, WGJOIN, WGNEWGAME, WGLISTGAMES, WGGIVEWORD, UNKNOWN, NOCOMMAND;
 
 	public static Command toCommand(String str) {
 		// Use this function to get the enum value for a string
