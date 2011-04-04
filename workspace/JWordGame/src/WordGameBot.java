@@ -75,18 +75,23 @@ public class WordGameBot extends PircBot {
 							user.words.put(word, user.words.get(word) + 1);
 						}
 						else {
-							sendMessage(channel, sender + ": Congratiulations! You have guessed the word '" + word + "' set by " + otheruser.nick + "!");
-							
-							// Give the guesser a reward
-							user.points += game.calcReward(otheruser.words.get(word));
-							
-							// Give the setter a reward
-							if(otheruser.words.get(word) < 10) {
-								otheruser.points += otheruser.words.get(word);
+							// First calculate the rewards
+							Integer guesserreward = game.calcReward(otheruser.words.get(word));
+							Integer setterreward;
+							if(otheruser.words.get(word) < game.maxpoints) {
+								setterreward = otheruser.words.get(word);
 							}
 							else {
-								otheruser.points += 10;
+								setterreward = game.maxpoints;
 							}
+							
+							// Inform the guesser about his accomplishment							
+							sendMessage(channel, sender + ": Congratiulations! You have guessed the word '" + word + "' set by " + otheruser.nick + "!");
+							sendMessage(channel, sender + "Rewards: " + user.nick + " " + guesserreward + " points, " + otheruser.nick + " " + setterreward + " points.");
+							
+							// Give the guesser and setter a reward
+							user.points += guesserreward;
+							otheruser.points += setterreward;
 							
 							// Remove the word from the setter
 							otheruser.words.remove(word);
