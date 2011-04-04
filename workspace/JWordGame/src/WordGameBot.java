@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -7,12 +12,13 @@ import org.jibble.pircbot.*;
 public class WordGameBot extends PircBot {
 	HashMap<String, Game> games;
 	HashMap<String, String> admindetails;
-	String adminpass;
+	String adminpass, savefolder;
 	
 	public WordGameBot(HashMap<String, Game> games) {
 		this.games = games;
 		admindetails = new HashMap<String, String>();
 		adminpass = null;
+		savefolder = "saves/";
 		
 		setName("JWG");
 		setLogin("JWordGame");
@@ -67,59 +73,7 @@ public class WordGameBot extends PircBot {
 		}
 		
 		// Now, let's see if a set word was mentioned (by a signed-up user)
-		if(user != null) {			
-			for(User otheruser : game.users) {				
-				for(String word : otheruser.words.keySet()) {
-					if(message.contains(word)) {
-						if(user.equals(otheruser)) {
-							user.words.put(word, user.words.get(word) + 1);
-						}
-						else {
-							// First calculate the rewards
-							Integer guesserreward = game.calcReward(otheruser.words.get(word));
-							Integer setterreward;
-							if(otheruser.words.get(word) < game.maxpoints) {
-								setterreward = otheruser.words.get(word);
-							}
-							else {
-								setterreward = game.maxpoints;
-							}
-							
-							// Inform the guesser about his accomplishment							
-							sendMessage(channel, sender + ": Congratiulations! You have guessed the word '" + word + "' set by " + otheruser.nick + "!");
-							sendMessage(channel, sender + "Rewards: " + user.nick + " " + guesserreward + " points, " + otheruser.nick + " " + setterreward + " points.");
-							
-							// Give the guesser and setter a reward
-							user.points += guesserreward;
-							otheruser.points += setterreward;
-							
-							// Remove the word from the setter
-							otheruser.words.remove(word);
-							
-							// Assign word to guesser or random person
-							if(user.wordsLeft <= game.maxwords) {
-								user.wordsLeft++;
-							}
-							else {
-								sendMessage(channel, sender + ": Uh oh! You seem to have reached the maximum amount of unset words." +
-										" Your unset word will now be randomly be given to someone.");
-								
-								// TODO Make a much more efficient method for the below code.
-								Random generator = new Random();
-								Integer randomint = generator.nextInt();
-								Integer i = 0;
-								for(User randomuser : game.users) {
-									if(i == randomint) {
-										randomuser.wordsLeft++;
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
+		parseLine(user, game, channel, message);
 	}
 	
 	public void onPrivateMessage(String sender, String login, String hostname, String message) {
@@ -163,6 +117,12 @@ public class WordGameBot extends PircBot {
 			case WGGIVEWORD:
 				WGGiveWord(sender, command);
 				break;
+			case WGSAVE:
+				WGSave(sender, command);
+				break;
+			case WGLOAD:
+				WGLoad(sender, command);
+				break;
 			}
 		}
 	}
@@ -192,15 +152,29 @@ public class WordGameBot extends PircBot {
 	
 	// Own methods
 	
+	public Game getGame(String gameid) {
+		for(String servchan : games.keySet()) {
+			if(gameid.equals(Integer.toHexString(System.identityHashCode(games.get(servchan))))) {
+				return games.get(servchan);
+			}
+		}
+		return null;
+	}
+	
 	public User getUser(Game game, String sender, String login, String hostname) {
 		if(game == null) {
 			return null;
 		}
 		
-		User user;
-		user = game.getUser(sender, login, hostname);
+		return game.getUser(sender, login, hostname);
+	}
+	
+	public User getUserByNick(Game game, String nick) {
+		if(game == null) {
+			return null;
+		}
 		
-		return user;
+		return game.getUserByNick(nick);
 	}
 	
 	public void tellNotRegistered(String channel, String sender) {
@@ -215,6 +189,58 @@ public class WordGameBot extends PircBot {
 	
 	public boolean isAdmin(String sender, String login, String hostname) {
 		return (sender.equals(admindetails.get("nick")) && login.equals(admindetails.get("login")) && hostname.equals(admindetails.get("hostname")));
+	}
+	
+	public void parseLine(User guesser, Game game, String channel, String message) {
+		if(guesser != null) {			
+			for(User setter : game.users) {				
+				for(String word : setter.words.keySet()) {
+					if(message.contains(word)) {
+						if(guesser.equals(setter)) {
+							// User mentioned his own word
+							guesser.words.put(word, guesser.words.get(word) + 1);
+						}
+						else {
+							// User mentioned someone elses word
+							// First calculate the rewards
+							Integer guesserreward = game.calcGuesserReward(setter.words.get(word));
+							Integer setterreward = game.calcSetterReward(setter.words.get(word));
+							
+							// Inform the guesser about his accomplishment							
+							sendMessage(channel, guesser.nick + ": Congratiulations! You have guessed the word '" + word + "' set by " + setter.nick + "!");
+							sendMessage(channel, "Rewards: " + guesser.nick + " " + guesserreward + " points, " + setter.nick + " " + setterreward + " points.");
+							
+							// Give the guesser and setter a reward
+							guesser.points += guesserreward;
+							setter.points += setterreward;
+							
+							// Remove the word from the setter
+							setter.words.remove(word);
+							
+							// Assign word to guesser or random person
+							if(guesser.wordsLeft <= game.maxwords) {
+								guesser.wordsLeft++;
+							}
+							else {
+								sendMessage(channel, guesser.nick + ": Uh oh! You seem to have reached the maximum amount of unset words." +
+										" Your unset word will now be randomly be given to someone.");
+								
+								// TODO Make a much more efficient method for the below code.
+								Random generator = new Random();
+								Integer randomint = generator.nextInt();
+								Integer i = 0;
+								for(User randomuser : game.users) {
+									if(i == randomint) {
+										randomuser.wordsLeft++;
+										break;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	// User commands
@@ -380,42 +406,86 @@ public class WordGameBot extends PircBot {
 	}
 	
 	public void WGListGames(String sender) {
+		// TODO if no games, say that.
 		for(String servchan : games.keySet()) {
 			sendMessage(sender, servchan + " " + Integer.toHexString(System.identityHashCode(games.get(servchan))));
 		}
 	}
 	
 	public void WGGiveWord(String sender, Command command) {
-		boolean gamefound, userfound;
-		gamefound = false;
-		userfound = false;
-		
-		// TODO It seems to me that the nested if and for loops below could be written somewhat cleaner.
 		if(command.arguments.length == 3) {
-			for(String servchan : games.keySet()) {
-				if(command.arguments[1].equals(Integer.toHexString(System.identityHashCode(games.get(servchan))))) {
-					// We found the right game, now let's find the user
-					gamefound = true;
-					for(User user : games.get(servchan).users) {
-						if(command.arguments[2].equals(user.nick)) {
-							// We found the right user
-							userfound = true;
-							user.wordsLeft++;
-							sendMessage(sender, "1 Word given to " + user.nick + " on: " + servchan);
-						}
-					}
-					if(!userfound) {
-						sendMessage(sender, "No such user could be found.");
-					}
+			Game game = getGame(command.arguments[1]);
+			if(game != null) {				
+				User user = getUserByNick(game, command.arguments[2]);
+				if(user != null) {
+					user.wordsLeft++;
+					sendMessage(sender, "1 Word given to " + user.nick);
+				}
+				else {
+					sendMessage(sender, "No such user could be found.");
 				}
 			}
-			if(!gamefound) {
+			else {
 				sendMessage(sender, "No such game could be found.");
 			}
 		}
 		else {
 			sendMessage(sender, "WGGIVEWORD usage: !wggiveword <gameid> <user>");
 			sendMessage(sender, "Use !wglistgames to find the gameid.");
+		}
+	}
+	
+	public void WGSave(String sender, Command command) {
+		if(command.arguments.length == 2) {
+			Game game = getGame(command.arguments[1]);
+			if(game != null) {
+				try {
+					// If the directory does not exist yet, create it
+					if(!new File(savefolder).exists()) {
+						new File(savefolder).mkdirs();
+					}
+					
+					FileOutputStream fos = new FileOutputStream(savefolder + command.arguments[1]);
+					ObjectOutputStream oos = new ObjectOutputStream(fos);
+					oos.writeObject(game);
+					oos.close();
+					
+					sendMessage(sender, "Game saved.");
+				}
+				catch(Exception ex) {
+					sendMessage(sender, "Error occured while saving. See stacktrace in STDERR.");
+					ex.printStackTrace();
+				}
+			}
+			else {
+				sendMessage(sender, "No such game.");
+			}
+		}
+		else {
+			sendMessage(sender, "WGSAVE usage: !wgsave <gameid>");
+			sendMessage(sender, "Use !wglistgames to find the gameid.");
+		}
+	}
+	
+	public void WGLoad(String sender, Command command) {
+		if(command.arguments.length == 3) {
+			try {
+				FileInputStream fis = new FileInputStream(savefolder + command.arguments[2]);
+				ObjectInputStream ois = new ObjectInputStream(fis);
+				Game game = (Game)ois.readObject();
+				ois.close();
+				
+				games.put(getServer() + " " + command.arguments[1], game);
+				
+				sendMessage(sender, "Game loaded.");
+			}
+			catch(Exception ex) {
+				sendMessage(sender, "Error occured while loading. See stacktrace in STDERR. Did you type the gameid correctly?");
+			}
+		}
+		else {
+			sendMessage(sender, "WGLOAD usage: !wgload <#channel> <gameid>");
+			sendMessage(sender, "You need to know the gameid which was used previously to save the game.");
 		}
 	}
 }

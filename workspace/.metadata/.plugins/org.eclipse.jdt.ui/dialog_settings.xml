@@ -18,6 +18,10 @@
 	<section name="BuildPathsPropertyPage">
 		<item value="2" key="pageIndex"/>
 	</section>
+	<section name="RefactoringWizard.preview">
+		<item value="420" key="height"/>
+		<item value="620" key="width"/>
+	</section>
 	<section name="FatJarPackageWizard">
 		<item value="/home/derecho/Dropbox/JWordGame/JWordGame.jar" key="FatJarPackageWizardPage.DESTINATION_PATH_SELECTION"/>
 		<item value="JWordGame - JWordGame" key="FatJarPackageWizardPage.LAUNCH_CONFIGURATION_SELECTION_NAME"/>
@@ -30,10 +34,6 @@
 		<list key="FatJarPackageWizardPage.ANTSCRIPT_LOCATION_HISTORY">
 			<item value=".xml"/>
 		</list>
-	</section>
-	<section name="RefactoringWizard.preview">
-		<item value="420" key="height"/>
-		<item value="620" key="width"/>
 	</section>
 	<section name="org.eclipse.ltk.ui.refactoring.settings">
 		<item value="1" key="updateSimilarElementsMatchStrategy"/>

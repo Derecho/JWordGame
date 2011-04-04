@@ -12,11 +12,13 @@ public class JWordGame {
 		// First create the games HashMap
 		games = new HashMap<String, Game>();
 		
+		// TODO Load saved game objects and add them to the hashmap.
+		
 		// Generate a random password for the admin to identify itself with
 		adminpass = generatePassword(10);
 		System.out.println("[!] ADMIN PASSWORD: " + adminpass);
 		
-		// Launch the first  bot (a bot can be connected to 1 server and multiple channels)
+		// Launch the first bot (a bot can be connected to 1 server and multiple channels)
 		WordGameBot bot = new WordGameBot(games);
 		bot.adminpass = adminpass;
 		
