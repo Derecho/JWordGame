@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<workbench progressCount="13" version="2.0">
+<workbench progressCount="17" version="2.0">
 <workbenchAdvisor/>
-<window height="768" width="1024" x="0" y="0">
+<window height="768" maximized="true" width="1024" x="0" y="0">
 <fastViewData fastViewLocation="1024"/>
 <perspectiveBar>
 <itemSize x="160"/>
@@ -30,21 +30,41 @@
 <part id="0"/>
 <part id="1"/>
 <part id="2"/>
+<part id="3"/>
+<part id="4"/>
+<part id="5"/>
+<part id="6"/>
 </presentation>
 </folder>
 </info>
 </editorArea>
-<editor activePart="true" focus="true" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="JWordGame.java" partName="JWordGame.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/JWordGame.java" title="JWordGame.java" tooltip="JWordGame/src/JWordGame.java" workbook="DefaultEditorWorkbook">
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="JWordGame.java" partName="JWordGame.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/JWordGame.java" title="JWordGame.java" tooltip="JWordGame/src/JWordGame.java" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/JWordGame.java"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="30" selectionTopPixel="0"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="635" selectionTopPixel="133"/>
 </editor>
 <editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="WordGameBot.java" partName="WordGameBot.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/WordGameBot.java" title="WordGameBot.java" tooltip="JWordGame/src/WordGameBot.java" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/WordGameBot.java"/>
-<editorState selectionHorizontalPixel="0" selectionLength="7" selectionOffset="64" selectionTopPixel="0"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="446" selectionTopPixel="0"/>
 </editor>
-<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="TrustingSSLSocketFactory.java" partName="TrustingSSLSocketFactory.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java" title="TrustingSSLSocketFactory.java" tooltip="JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1116" selectionTopPixel="0"/>
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Game.java" partName="Game.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/Game.java" title="Game.java" tooltip="JWordGame/src/Game.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/Game.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="987" selectionTopPixel="199"/>
+</editor>
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Commands.java" partName="Commands.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/Commands.java" title="Commands.java" tooltip="JWordGame/src/Commands.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/Commands.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="88" selectionTopPixel="0"/>
+</editor>
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Command.java" partName="Command.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/Command.java" title="Command.java" tooltip="JWordGame/src/Command.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/Command.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="215" selectionTopPixel="0"/>
+</editor>
+<editor id="org.eclipse.jdt.ui.CompilationUnitEditor" name="User.java" partName="User.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/User.java" title="User.java" tooltip="JWordGame/src/User.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/User.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="505" selectionTopPixel="39"/>
+</editor>
+<editor activePart="true" focus="true" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="PircBot.java" partName="PircBot.java" path="/home/derecho/Dropbox/JWordGame/workspace/JWordGame/src/org/jibble/pircbot/PircBot.java" title="PircBot.java" tooltip="JWordGame/src/org/jibble/pircbot/PircBot.java" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/JWordGame/src/org/jibble/pircbot/PircBot.java"/>
+<editorState selectionHorizontalPixel="0" selectionLength="9" selectionOffset="124986" selectionTopPixel="52122"/>
 </editor>
 </editors>
 <views>
@@ -57,9 +77,8 @@
 <expanded>
 <category IMemento.internal.id="Warnings"/>
 <category IMemento.internal.id="Errors"/>
-<category IMemento.internal.id="Errors (3 items)"/>
 </expanded>
-<columnWidths org.eclipse.ui.ide.locationField="73" org.eclipse.ui.ide.markerType="108" org.eclipse.ui.ide.pathField="143" org.eclipse.ui.ide.resourceField="108" org.eclipse.ui.ide.severityAndDescriptionField="350"/>
+<columnWidths org.eclipse.ui.ide.locationField="0" org.eclipse.ui.ide.markerType="0" org.eclipse.ui.ide.pathField="0" org.eclipse.ui.ide.resourceField="0" org.eclipse.ui.ide.severityAndDescriptionField="0"/>
 <visible IMemento.internal.id="org.eclipse.ui.ide.severityAndDescriptionField"/>
 <visible IMemento.internal.id="org.eclipse.ui.ide.resourceField"/>
 <visible IMemento.internal.id="org.eclipse.ui.ide.pathField"/>
@@ -105,7 +124,7 @@
 <view id="org.eclipse.jdt.ui.SourceView" partName="Declaration"/>
 <view id="org.eclipse.jdt.ui.JavadocView" partName="Javadoc"/>
 </views>
-<perspectives activePart="org.eclipse.ui.console.ConsoleView" activePerspective="org.eclipse.jdt.ui.JavaPerspective">
+<perspectives activePart="org.eclipse.jdt.ui.PackageExplorer" activePerspective="org.eclipse.jdt.ui.JavaPerspective">
 <perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
 <descriptor class="org.eclipse.jdt.internal.ui.JavaPerspectiveFactory" id="org.eclipse.jdt.ui.JavaPerspective" label="Java"/>
 <alwaysOnActionSet id="org.eclipse.ui.cheatsheets.actionSet"/>
@@ -159,8 +178,8 @@
 <view id="org.eclipse.ui.views.ProblemView"/>
 <view id="org.eclipse.jdt.ui.JavadocView"/>
 <view id="org.eclipse.jdt.ui.SourceView"/>
-<view id="org.eclipse.ui.console.ConsoleView"/>
 <view id="org.eclipse.ui.views.PropertySheet"/>
+<view id="org.eclipse.ui.console.ConsoleView"/>
 <view id="org.eclipse.ui.views.ContentOutline"/>
 <fastViewBars/>
 <layout>
@@ -223,82 +242,160 @@
 <workingSets/>
 <navigationHistory>
 <editors>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/src/JWordGame.java"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/src/WordGameBot.java"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/org/jibble/pircbot/Colors.java"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/src/Game.java"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/src/JWordGame.java"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" path="/JWordGame/src/org/jibble/pircbot/PircBot.java"/>
 </editors>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="402" y="0"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2119" y="0"/>
 </item>
-<item historyLabel="WordGameBot.java" index="1">
-<position info="not_deleted" x="426" y="0"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2117" y="0"/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="302" y="0"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2112" y="0"/>
 </item>
-<item historyLabel="WordGameBot.java" index="1">
-<position info="not_deleted" x="426" y="0"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2117" y="0"/>
 </item>
-<item historyLabel="WordGameBot.java" index="1">
-<position info="not_deleted" x="66" y="0"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3527" y="0"/>
 </item>
-<item historyLabel="WordGameBot.java" index="1">
-<position info="not_deleted" x="426" y="0"/>
+<item historyLabel="Game.java" index="1">
+<position info="not_deleted" x="1247" y="0"/>
 </item>
-<item historyLabel="WordGameBot.java" index="1">
-<position info="not_deleted" x="64" y="7"/>
+<item historyLabel="Game.java" index="1">
+<position info="not_deleted" x="1243" y="0"/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="302" y="0"/>
+<item historyLabel="Game.java" index="1">
+<position info="not_deleted" x="987" y="0"/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3527" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2381" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3527" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="Game.java" index="1">
+<position info="not_deleted" x="987" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="JWordGame.java" index="2">
+<position info="not_deleted" x="635" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3298" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3268" y="6"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="JWordGame.java" index="2">
+<position info="not_deleted" x="635" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="JWordGame.java" index="2">
+<position info="not_deleted" x="635" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
 <position/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="7" y="10"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
 </item>
-<item historyLabel="WordGameBot.java" index="1">
-<position info="not_deleted" x="64" y="7"/>
+<item historyLabel="Game.java" index="1">
+<position info="not_deleted" x="987" y="0"/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="7" y="10"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
-<position/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="3518" y="0"/>
 </item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="7" y="10"/>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="6217" y="0"/>
 </item>
-<item historyLabel="Colors.java" index="2">
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2461" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="2947" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="5084" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4772" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4773" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4774" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4800" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="5084" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4921" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4949" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="5072" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="5072" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="5072" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4899" y="0"/>
+</item>
+<item historyLabel="JWordGame.java" index="2">
+<position info="not_deleted" x="635" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="4899" y="0"/>
+</item>
+<item historyLabel="WordGameBot.java" index="0">
+<position info="not_deleted" x="446" y="0"/>
+</item>
+<item historyLabel="PircBot.java" index="3">
 <position info="not_deleted" x="5" y="0"/>
 </item>
-<item historyLabel="Colors.java" index="2">
-<position info="not_deleted" x="447" y="0"/>
-</item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="7" y="10"/>
-</item>
-<item historyLabel="Colors.java" index="2">
-<position info="not_deleted" x="449" y="0"/>
-</item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="7" y="10"/>
-</item>
-<item historyLabel="TrustingSSLSocketFactory.java" index="3">
-<position info="not_deleted" x="0" y="0"/>
-</item>
-<item historyLabel="TrustingSSLSocketFactory.java" index="3">
-<position info="not_deleted" x="1116" y="0"/>
-</item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="7" y="10"/>
-</item>
-<item historyLabel="JWordGame.java" index="0">
-<position info="not_deleted" x="395" y="0"/>
-</item>
-<item active="true" historyLabel="JWordGame.java" index="0">
-<position/>
+<item active="true" historyLabel="PircBot.java" index="3">
+<position info="not_deleted" x="124986" y="9"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -313,22 +410,36 @@
 <trimItem IMemento.internal.id="org.eclise.ui.internal.FastViewBar"/>
 <trimItem IMemento.internal.id="org.eclipse.jface.action.StatusLineManager"/>
 <trimItem IMemento.internal.id="org.eclipse.ui.internal.progress.ProgressRegion"/>
-<trimItem IMemento.internal.id="org.eclipse.ui.internal.intro.impl.presentations.IntroLaunchBar"/>
 </trimArea>
 </trimLayout>
 </window>
 <mruList>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="TrustingSSLSocketFactory.java" tooltip="JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java">
-<persistable path="/JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="PircBot.java" tooltip="JWordGame/src/org/jibble/pircbot/PircBot.java">
+<persistable path="/JWordGame/src/org/jibble/pircbot/PircBot.java"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Colors.java" tooltip="JWordGame/org/jibble/pircbot/Colors.java">
-<persistable path="/JWordGame/org/jibble/pircbot/Colors.java"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="User.java" tooltip="JWordGame/src/User.java">
+<persistable path="/JWordGame/src/User.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Command.java" tooltip="JWordGame/src/Command.java">
+<persistable path="/JWordGame/src/Command.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Commands.java" tooltip="JWordGame/src/Commands.java">
+<persistable path="/JWordGame/src/Commands.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Game.java" tooltip="JWordGame/src/Game.java">
+<persistable path="/JWordGame/src/Game.java"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="WordGameBot.java" tooltip="JWordGame/src/WordGameBot.java">
 <persistable path="/JWordGame/src/WordGameBot.java"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="JWordGame.java" tooltip="JWordGame/src/JWordGame.java">
 <persistable path="/JWordGame/src/JWordGame.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="TrustingSSLSocketFactory.java" tooltip="JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java">
+<persistable path="/JWordGame/src/org/jibble/pircbot/TrustingSSLSocketFactory.java"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.jdt.ui.CompilationUnitEditor" name="Colors.java" tooltip="JWordGame/org/jibble/pircbot/Colors.java">
+<persistable path="/JWordGame/org/jibble/pircbot/Colors.java"/>
 </file>
 </mruList>
 </workbench>

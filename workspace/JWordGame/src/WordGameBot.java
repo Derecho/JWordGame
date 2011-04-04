@@ -25,21 +25,30 @@ public class WordGameBot extends PircBot {
 			String login, String hostname, String message) {
 		// A message has been received, parse it.
 		
+		// Get the game if there is one running
+		Game game = games.get(getServer() + " " + channel);
+		
 		// Get the user if (s)he is registered
-		User user = getUser(channel, sender, login, hostname);
+		User user = getUser(game, sender, login, hostname);
 		
 		// First try all the commands
+		
 		Command command;
-		command = Commands.toCommand(message);
+		if(game != null) {
+			command = Commands.toCommand(message, game.commandprefix);
+		}
+		else {
+			command = Commands.toCommand(message, "!");
+		}
 		
 		switch(command.command) {
 		case WG:
-			sendMessage(channel, sender + ": This is JWordGame, an irc game based on " +
-					"(accidentally) guessing words set by others. Type !wghelp for more help.");
+			if(command.arguments.length == 2) { WGInfo(channel, command.arguments[1]); }
+			else { WGInfo(channel, sender); }
 			break;
 		case WGHELP:
-			sendMessage(channel, sender + ": Type !wgsignup to signup for the wordgame.");
-			sendMessage(channel, sender + ": Other available commands: !wgpoints !wgstatus, and PM-only: !wgset !wglistwords");
+			if(command.arguments.length == 2) { WGHelp(channel, command.arguments[1]); }
+			else { WGHelp(channel, sender); }
 			break;
 		case WGSIGNUP:
 			WGSignup(channel, sender, login, hostname);
@@ -58,11 +67,7 @@ public class WordGameBot extends PircBot {
 		}
 		
 		// Now, let's see if a set word was mentioned (by a signed-up user)
-		if(user != null) {
-			// Since the previously acquired user exists, the game must also exist, and no error checking is needed.
-			Game game;
-			game = games.get(getServer() + " " + channel);
-			
+		if(user != null) {			
 			for(User otheruser : game.users) {				
 				for(String word : otheruser.words.keySet()) {
 					if(message.contains(word)) {
@@ -87,11 +92,7 @@ public class WordGameBot extends PircBot {
 							otheruser.words.remove(word);
 							
 							// Assign word to guesser or random person
-							//DEBUG
-							System.out.println("Words left for " + user.nick + ": " + user.wordsLeft);
 							if(user.wordsLeft <= game.maxwords) {
-								//DEBUG
-								System.out.println("Yay he receives a word.");
 								user.wordsLeft++;
 							}
 							else {
@@ -118,9 +119,15 @@ public class WordGameBot extends PircBot {
 	
 	public void onPrivateMessage(String sender, String login, String hostname, String message) {
 		Command command;
-		command = Commands.toCommand(message);
+		command = Commands.toCommand(message, null);
 		
 		switch(command.command) {
+		case WG:
+			WGInfo(sender, null);
+			break;
+		case WGHELP:
+			WGHelp(sender, null);
+			break;
 		case WGSET:
 			WGSet(sender, login, hostname, command);
 			break;
@@ -180,10 +187,7 @@ public class WordGameBot extends PircBot {
 	
 	// Own methods
 	
-	public User getUser(String channel, String sender, String login, String hostname) {
-		Game game;
-		game = games.get(getServer() + " " + channel);
-		
+	public User getUser(Game game, String sender, String login, String hostname) {
 		if(game == null) {
 			return null;
 		}
@@ -209,6 +213,28 @@ public class WordGameBot extends PircBot {
 	}
 	
 	// User commands
+	
+	public void WGInfo(String recepient, String nick) {
+		if(nick == null) {
+			sendMessage(recepient, "This is JWordGame, an irc game based on " +
+			"(accidentally) guessing words set by others. Type !wghelp for more help.");
+		}
+		else {
+			sendMessage(recepient, nick + ": This is JWordGame, an irc game based on " +
+			"(accidentally) guessing words set by others. Type !wghelp for more help.");
+		}
+	}
+	
+	public void WGHelp(String recepient, String nick) {
+		if(nick == null) {
+			sendMessage(recepient, "Type !wgsignup to signup for the wordgame.");
+			sendMessage(recepient, "Other available commands: !wgpoints !wgstatus, and PM-only: !wgset !wglistwords");
+		}
+		else {
+			sendMessage(recepient, nick + ": Type !wgsignup to signup for the wordgame.");
+			sendMessage(recepient, nick + ": Other available commands: !wgpoints !wgstatus, and PM-only: !wgset !wglistwords");
+		}
+	}
 	
 	public void WGSignup(String channel, String sender, String login, String hostname) {		
 		Game game;
@@ -258,8 +284,8 @@ public class WordGameBot extends PircBot {
 	
 	public void WGSet(String sender, String login, String hostname, Command command) {
 		if(command.arguments.length == 3) {
-			User user;
-			user = getUser(command.arguments[1], sender, login, hostname);
+			Game game = games.get(getServer() + " " + command.arguments[1]);
+			User user = getUser(game, sender, login, hostname);
 			if(user == null) {
 				tellNotRegisteredPM(sender);
 			}
@@ -279,8 +305,8 @@ public class WordGameBot extends PircBot {
 	
 	public void WGListWords(String sender, String login, String hostname, Command command) {
 		if(command.arguments.length == 2) {
-			User user;
-			user = getUser(command.arguments[1], sender, login, hostname);
+			Game game = games.get(getServer() + " " + command.arguments[1]);
+			User user = getUser(game, sender, login, hostname);
 			if(user == null) {
 				tellNotRegisteredPM(sender);
 			}

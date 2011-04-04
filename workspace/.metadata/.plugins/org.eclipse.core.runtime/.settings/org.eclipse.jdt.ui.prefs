@@ -1,4 +1,4 @@
-#Sun Apr 03 10:44:45 CEST 2011
+#Sun Apr 03 21:32:52 CEST 2011
 semanticHighlighting.annotation.enabled=true
 semanticHighlighting.localVariableDeclaration.color=190,214,255
 java_comment_task_tag=0,255,0
@@ -16,6 +16,7 @@ pf_coloring_assignment=208,208,208
 org.eclipse.jdt.ui.text.custom_templates=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><templates/>
 java_bracket=208,208,208
 java_string=220,120,220
+content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"/>
 java_doc_default=204,223,50
 spelling_locale_initialized=true
 java_doc_keyword=217,229,119

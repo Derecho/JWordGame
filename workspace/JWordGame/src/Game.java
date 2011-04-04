@@ -8,11 +8,13 @@ public class Game {
 	
 	Set<User> users;
 	Integer maxpoints, maxwords;
+	String commandprefix;
 	
 	public Game() {
 		users = new HashSet<User>();
 		maxpoints = 10; // Maximum amount of points that is rewarded to a guesser.
 		maxwords = 2; // Maximum amount of words that can be set by a user.
+		commandprefix = "!";
 	}
 	
 	public boolean addUser(User newuser) {
