@@ -23,7 +23,7 @@ public class JWordGame {
 		bot.adminpass = adminpass;
 		
 		// Enable debugging output
-		bot.setVerbose(true);
+		//bot.setVerbose(true);
 		
 		// Connect to the IRC server
 		bot.connect("irc.sector5d.org", 6697, new TrustingSSLSocketFactory());

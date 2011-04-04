@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -136,6 +137,9 @@ public class WordGameBot extends PircBot {
 				break;
 			case WGLOAD:
 				WGLoad(sender, command);
+				break;
+			case WGSAFEQUIT:
+				WGSafeQuit(sender);
 				break;
 			}
 		}
@@ -607,5 +611,29 @@ public class WordGameBot extends PircBot {
 			sendMessage(sender, "WGLOAD usage: !wgload <#channel> <gameid>");
 			sendMessage(sender, "You need to know the gameid which was used previously to save the game.");
 		}
+	}
+	
+	public void WGSafeQuit(String sender) {
+		for(Game game : new HashSet<Game>(games.values())) {
+			try {
+				// If the directory does not exist yet, create it
+				if(!new File(savefolder).exists()) {
+					new File(savefolder).mkdirs();
+				}
+				
+				FileOutputStream fos = new FileOutputStream(savefolder + Integer.toHexString(System.identityHashCode(game)));
+				ObjectOutputStream oos = new ObjectOutputStream(fos);
+				oos.writeObject(game);
+				oos.close();
+			}
+			catch(Exception ex) {
+				sendMessage(sender, "Error occured while saving. See stacktrace in STDERR.");
+				ex.printStackTrace();
+			}
+		}
+		sendMessage(sender, "Games saved.");
+		disconnect();
+		System.out.println("Exiting, WGSAFEQUIT command issued.");
+		System.exit(0);
 	}
 }
