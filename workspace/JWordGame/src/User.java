@@ -10,7 +10,7 @@ public class User implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	String nick, login, hostname;
+	String nick, login, hostname, defaultchannel;
 	Integer points, wordsLeft;
 	HashMap<String, Integer> words;
 	byte[] passwordhash;
@@ -20,6 +20,7 @@ public class User implements Serializable {
 		this.login = login;
 		this.hostname = hostname;
 		
+		defaultchannel = null;
 		passwordhash = null;
 		points = 0;
 		wordsLeft = 0;
