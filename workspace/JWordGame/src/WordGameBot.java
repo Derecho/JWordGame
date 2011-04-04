@@ -74,7 +74,7 @@ public class WordGameBot extends PircBot {
 			else { tellNotRegistered(channel, sender);	}
 			break;
 		case WGDEFAULTCHANNEL:
-			if(user != null) { WGDefaultChannel(channel, user);	}
+			if(user != null) { WGDefaultChannel(channel, user, command);	}
 			else { tellNotRegistered(channel, sender);	}
 			break;
 		case WGTOP:
@@ -436,9 +436,13 @@ public class WordGameBot extends PircBot {
 		}
 	}
 	
-	public void WGDefaultChannel(String channel, User user) {
-		user.defaultchannel = channel;
-		sendMessage(channel, user.nick + ": Your default channel has been set to: " + channel);
+	public void WGDefaultChannel(String channel, User user, Command command) {
+		String defaultchannel = channel;
+		if(command.arguments.length == 2) {
+			defaultchannel = command.arguments[1];
+		}
+		user.defaultchannel = defaultchannel;
+		sendMessage(channel, user.nick + ": Your default channel has been set to: " + defaultchannel);
 	}
 	
 	public void WGTop(String channel, String sender, Game game, Integer amount) {
