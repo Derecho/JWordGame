@@ -16,6 +16,21 @@ public class WordGameBot extends PircBot {
 	HashMap<String, String> admindetails;
 	String adminpass, savefolder;
 	
+	final String MSG_NOTREGISTERED = "You do not have an account yet or have not signed in properly. Use !wgsignup to sign up for an account.";
+	final String MSG_MAXWORDSREACHED = "Uh oh! You seem to have reached the maximum amount of unset words. Your unset word will now be randomly be given to someone.";
+	final String MSG_WGINFO = "This is JWordGame, an irc game based on (accidentally) guessing words set by others. Type !wghelp for more help.";
+	final String MSG_NOGAME = "There is no game in progress on this channel (yet).";
+	final String MSG_WGHELP1 = "Type !wgsignup to signup for the wordgame.";
+	final String MSG_WGHELP2 = "Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel, and PM-only: !wgset !wglistwords";
+	final String MSG_SIGNUPSUCCESS = "You have succefully signed up for the wordgame.";
+	final String MSG_SIGNUPFAIL = "A user with that nickname already exists.";
+	final String MSG_WANTDEFAULTCHANNEL = "If you want to use a default channel, type !wgdefaultchannel in the channel you would like to use as your default channel.";
+	final String MSG_WORDSET = "Word set.";
+	final String MSG_NOUNSETWORDS = "You do not have any unset words.";
+	final String MSG_DONATED = "Word donated.";
+	final String MSG_DEFAULTCHANNEL = "Your default channel has been set to: ";
+	final String MSG_INVALIDNUMBER = "Please provide a valid number.";
+	
 	public WordGameBot(HashMap<String, Game> games) {
 		this.games = games;
 		admindetails = new HashMap<String, String>();
@@ -79,7 +94,7 @@ public class WordGameBot extends PircBot {
 			else { tellNotRegistered(channel, sender);	}
 			break;
 		case WGTOP:
-			WGTop(channel, sender, game, 3);
+			WGTop(channel, sender, game, command);
 			break;
 		case WGSET:
 		case WGLISTWORDS:
@@ -195,14 +210,17 @@ public class WordGameBot extends PircBot {
 		return game.getUserByNick(nick);
 	}
 	
-	public void tellNotRegistered(String channel, String sender) {
-		sendMessage(channel, sender + ": You do not have an account yet or have not signed in properly." +
-				" Use !wgsignup to sign up for an account.");
+	public void sendMessageWrapper(String recipient, String nick, String message) {
+		if(nick == null) {
+			sendMessage(recipient, message);
+		}
+		else {
+			sendMessage(recipient, nick + ": " + message);
+		}
 	}
 	
-	public void tellNotRegisteredPM(String sender) {
-		sendMessage(sender, "You do not seem to have an account on that channel yet, or you have not signed in properly." +
-				" Use !wgsignup in the channel to sign up for an account");
+	public void tellNotRegistered(String channel, String sender) {
+		sendMessageWrapper(channel, sender, MSG_NOTREGISTERED);
 	}
 	
 	public boolean isAdmin(String sender, String login, String hostname) {
@@ -240,8 +258,7 @@ public class WordGameBot extends PircBot {
 								guesser.wordsLeft++;
 							}
 							else {
-								sendMessage(channel, guesser.nick + ": Uh oh! You seem to have reached the maximum amount of unset words." +
-										" Your unset word will now be randomly be given to someone.");
+								sendMessageWrapper(channel, guesser.nick, MSG_MAXWORDSREACHED);
 								
 								// TODO Make a much more efficient method for the below code.
 								Random generator = new Random();
@@ -264,25 +281,12 @@ public class WordGameBot extends PircBot {
 	// User commands
 	
 	public void WGInfo(String recepient, String nick) {
-		if(nick == null) {
-			sendMessage(recepient, "This is JWordGame, an irc game based on " +
-			"(accidentally) guessing words set by others. Type !wghelp for more help.");
-		}
-		else {
-			sendMessage(recepient, nick + ": This is JWordGame, an irc game based on " +
-			"(accidentally) guessing words set by others. Type !wghelp for more help.");
-		}
+		sendMessageWrapper(recepient, nick, MSG_WGINFO);
 	}
 	
 	public void WGHelp(String recepient, String nick) {
-		if(nick == null) {
-			sendMessage(recepient, "Type !wgsignup to signup for the wordgame.");
-			sendMessage(recepient, "Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel, and PM-only: !wgset !wglistwords");
-		}
-		else {
-			sendMessage(recepient, nick + ": Type !wgsignup to signup for the wordgame.");
-			sendMessage(recepient, nick + ": Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel, and PM-only: !wgset !wglistwords");
-		}
+		sendMessageWrapper(recepient, nick, MSG_WGHELP1);
+		sendMessageWrapper(recepient, nick, MSG_WGHELP2);
 	}
 	
 	public void WGSignup(String channel, String sender, String login, String hostname) {		
@@ -290,15 +294,15 @@ public class WordGameBot extends PircBot {
 		game = games.get(getServer() + " " + channel);
 		
 		if(game == null) {
-			sendMessage(channel, sender + ": There is no game in progress on this channel (yet).");
+			sendMessageWrapper(channel, sender, MSG_NOGAME);
 			return;
 		}
 		
 		if(game.addUser(new User(sender, login, hostname))) {
-			sendMessage(channel, sender + ": You have succefully signed up for the wordgame.");
+			sendMessageWrapper(channel, sender, MSG_SIGNUPSUCCESS);
 		}
 		else {
-			sendMessage(channel, sender + ": A user with that nickname already exists.");
+			sendMessageWrapper(channel, sender, MSG_SIGNUPFAIL);
 		}
 	}
 	
@@ -314,10 +318,11 @@ public class WordGameBot extends PircBot {
 		game = games.get(getServer() + " " + channel);
 		
 		if(game == null) {
-			sendMessage(channel, sender + ": There is no game in progress on this channel (yet).");
+			sendMessageWrapper(channel, sender, MSG_NOGAME);
 			return;
 		}
 		
+		// TODO Sort the users based on words left (descending)
 		for(User user : game.users) {
 			setwords += user.words.size();
 			if(user.wordsLeft > 0) {
@@ -350,15 +355,14 @@ public class WordGameBot extends PircBot {
 					word = command.arguments[1];
 					
 					if(game == null) {
-						sendMessage(sender, "If you want to use a default channel, " +
-								"type !wgdefaultchannel in the channel you would like to use as your default channel.");
+						sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
 						sendMessage(sender, "Otherwise, use: !wgset <#channel> <word>");
 						return;
 					}
 				}
 			}
 			if(user == null) {
-				tellNotRegisteredPM(sender);
+				tellNotRegistered(sender, null);
 				return;
 			}
 		}
@@ -369,14 +373,14 @@ public class WordGameBot extends PircBot {
 		
 		// We got all the needed data, continue
 		if(user == null) {
-			tellNotRegisteredPM(sender);
+			tellNotRegistered(sender, null);
 		}
 		else {
 			if(user.setWord(word)) {
-				sendMessage(sender, "Word set.");
+				sendMessage(sender, MSG_WORDSET);
 			}
 			else {
-				sendMessage(sender, "You cannot set any words.");
+				sendMessage(sender, MSG_NOUNSETWORDS);
 			}
 		}
 	}
@@ -396,27 +400,26 @@ public class WordGameBot extends PircBot {
 					user = loopuser;
 					game = games.get(getServer() + " " + user.defaultchannel);
 					if(game == null) {
-						sendMessage(sender, "If you want to use a default channel, " +
-								"type !wgdefaultchannel in the channel you would like to use as your default channel.");
+						sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
 						sendMessage(sender, "Otherwise, use: !wglistwords <#channel>");
 						return;
 					}
 				}
 			}
 			if(user == null) {
-				tellNotRegisteredPM(sender);
+				tellNotRegistered(sender, null);
 				return;
 			}
 		}
 		else {
 			sendMessage(sender, "WGLISTWORDS usage: !wglistwords <#channel>");
-			sendMessage(sender, "If you have set a default channel, you can omit that in the command.");
+			sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
 			return;
 		}
 		
 		// We got all the needed data, continue
 		if(user == null) {
-			tellNotRegisteredPM(sender);
+			tellNotRegistered(sender, null);
 		}
 		else {
 			sendMessage(sender, user.listWords());
@@ -429,14 +432,14 @@ public class WordGameBot extends PircBot {
 				User recipient = getUserByNick(game, command.arguments[1]);
 				user.wordsLeft--;
 				recipient.wordsLeft++;
-				sendMessage(channel, "Word donated.");
+				sendMessage(channel, MSG_DONATED);
 			}
 			else {
 				sendMessage(channel, "WGDONATE usage: !wgdonate <user>");
 			}
 		}
 		else {
-			sendMessage(channel, "You do not have any unset words to donate.");
+			sendMessage(channel, MSG_NOUNSETWORDS);
 		}
 	}
 	
@@ -446,22 +449,32 @@ public class WordGameBot extends PircBot {
 			defaultchannel = command.arguments[1];
 		}
 		user.defaultchannel = defaultchannel;
-		sendMessage(channel, user.nick + ": Your default channel has been set to: " + defaultchannel);
+		sendMessageWrapper(channel, user.nick, MSG_DEFAULTCHANNEL + defaultchannel);
 	}
 	
-	public void WGTop(String channel, String sender, Game game, Integer amount) {
+	public void WGTop(String channel, String sender, Game game, Command command) {
+		Integer amount = 3;  // Default is to show the top 3 players
+		if(command.arguments.length == 2) {
+			try {
+				amount = Integer.parseInt(command.arguments[1]);
+			}
+			catch(Exception ex) {
+				sendMessageWrapper(channel, sender, MSG_INVALIDNUMBER);
+			}
+		}
+		
 		TreeMap<Integer, String> topusers = new TreeMap<Integer, String>();
 		
 		if(game != null) {
 			for(User user : game.users) {
 				topusers.put(user.points, user.nick);
 			}
-			sendMessage(channel, sender + ": Top " + amount + " users in this game:");
+			sendMessageWrapper(channel, sender, "Top " + amount + " users in this game:");
 			
 			Integer i = 1;
 			Integer key = topusers.lastKey();
 			while(i <= amount) {
-				sendMessage(channel, i + ". " + topusers.get(key) + " with " + key + " points.");
+				sendMessageWrapper(channel, null, i + ". " + topusers.get(key) + " with " + key + " points.");
 				key = topusers.lowerKey(key);
 				if(key == null) {
 					break;
@@ -470,7 +483,7 @@ public class WordGameBot extends PircBot {
 			}
 		}
 		else {
-			sendMessage(channel, sender + ": There is no game in progress on this channel (yet).");
+			sendMessageWrapper(channel, sender, MSG_NOGAME);
 		}
 	}
 	
