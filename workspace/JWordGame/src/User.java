@@ -1,7 +1,8 @@
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class User implements Serializable {
@@ -12,7 +13,7 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 	String nick, login, hostname, defaultchannel;
 	Integer points, wordsLeft;
-	HashMap<String, Integer> words;
+	Set<Word> wordobjs;
 	byte[] passwordhash;
 
 	public User(String nick, String login, String hostname) {
@@ -24,12 +25,12 @@ public class User implements Serializable {
 		passwordhash = null;
 		points = 0;
 		wordsLeft = 0;
-		words = new HashMap<String, Integer>();
+		wordobjs = new HashSet<Word>();
 	}
 	
 	public boolean setWord(String word) {
 		if(wordsLeft > 0) {
-			words.put(word, 0);
+			wordobjs.add(new Word(word));
 			wordsLeft--;
 			return true;
 		}
@@ -41,15 +42,15 @@ public class User implements Serializable {
 	public String listWords() {
 		String returnstr = new String();
 		
-		if(words.isEmpty()) {
+		if(wordobjs.isEmpty()) {
 			return "You haven't set any words.";
 		}
 		
-		for(String word : words.keySet()) {
-			returnstr = returnstr + word + " (" + words.get(word) + ") ";
+		for(Word word : wordobjs) {
+			returnstr = returnstr + word + " (" + word.mentions + "), ";
 		}
 		
-		return returnstr;
+		return returnstr.substring(0, returnstr.length()-2);
 	}
 	
 	public void setPassword(String password) {

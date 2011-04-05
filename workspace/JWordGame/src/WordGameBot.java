@@ -21,7 +21,7 @@ public class WordGameBot extends PircBot {
 	final String MSG_WGINFO = "This is JWordGame, an irc game based on (accidentally) guessing words set by others. Type !wghelp for more help.";
 	final String MSG_NOGAME = "There is no game in progress on this channel (yet).";
 	final String MSG_WGHELP1 = "Type !wgsignup to signup for the wordgame.";
-	final String MSG_WGHELP2 = "Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel, and PM-only: !wgset !wglistwords";
+	final String MSG_WGHELP2 = "Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel !wgtop, and PM-only: set listwords pwd login";
 	final String MSG_SIGNUPSUCCESS = "You have succefully signed up for the wordgame.";
 	final String MSG_SIGNUPFAIL = "A user with that nickname already exists.";
 	final String MSG_WANTDEFAULTCHANNEL = "If you want to use a default channel, type !wgdefaultchannel in the channel you would like to use as your default channel.";
@@ -123,11 +123,15 @@ public class WordGameBot extends PircBot {
 		case WGLISTWORDS:
 			WGListWords(sender, login, hostname, command);
 			break;
+		case WGPWD:
+			WGPwd(sender, login, hostname, command);
+			break;
+		case WGLOGIN:
+			// TODO WGLogin(sender, login, hostname, command);  Doesnt appear to work yet
+			break;
 		case WGADMIN:
 			WGAdmin(sender, login, hostname, command);
 			break;
-		// TODO add a WGLOGIN command, for when someone's nickname, loginname or hostname has changes.
-		// This would probably work with a password.
 		}
 		
 		if(isAdmin(sender, login, hostname)) {
@@ -159,6 +163,13 @@ public class WordGameBot extends PircBot {
 			}
 		}
 	}
+
+	public void onAction(String sender, String login, String hostname, String target, String action) {
+		// Treat an action as a normal message.
+		Game game = games.get(getServer() + " " + target);
+		User user = getUser(game, sender, login, hostname);
+		parseLine(user, game, target, action);
+	}
 	
 	public void onKick(String channel, String kickerNick, String kickerLogin, String kickerHostname, String recipientNick, String reason) {
 		// Autojoin on kick
@@ -187,7 +198,7 @@ public class WordGameBot extends PircBot {
 	
 	public Game getGame(String gameid) {
 		for(String servchan : games.keySet()) {
-			if(gameid.equals(Integer.toHexString(System.identityHashCode(games.get(servchan))))) {
+			if(gameid.equals(games.get(servchan).id)) {
 				return games.get(servchan);
 			}
 		}
@@ -230,17 +241,17 @@ public class WordGameBot extends PircBot {
 	public void parseLine(User guesser, Game game, String channel, String message) {
 		if(guesser != null) {			
 			for(User setter : game.users) {				
-				for(String word : setter.words.keySet()) {
-					if(message.contains(word)) {
+				for(Word word : setter.wordobjs) {
+					if(message.contains(word.word)) {
 						if(guesser.equals(setter)) {
 							// User mentioned his own word
-							guesser.words.put(word, guesser.words.get(word) + 1);
+							word.mentions++;
 						}
 						else {
 							// User mentioned someone elses word
 							// First calculate the rewards
-							Integer guesserreward = game.calcGuesserReward(setter.words.get(word));
-							Integer setterreward = game.calcSetterReward(setter.words.get(word));
+							Integer guesserreward = word.calcGuesserReward(game.maxpoints);
+							Integer setterreward = word.calcSetterReward(game.maxpoints);
 							
 							// Inform the guesser about his accomplishment							
 							sendMessage(channel, guesser.nick + ": Congratiulations! You have guessed the word '" + word + "' set by " + setter.nick + "!");
@@ -251,7 +262,7 @@ public class WordGameBot extends PircBot {
 							setter.points += setterreward;
 							
 							// Remove the word from the setter
-							setter.words.remove(word);
+							setter.wordobjs.remove(word);
 							
 							// Assign word to guesser or random person
 							if(guesser.wordsLeft <= game.maxwords) {
@@ -313,6 +324,7 @@ public class WordGameBot extends PircBot {
 	public void WGStatus(String channel, String sender) {
 		Integer setwords = 0;
 		String availablewords = new String();
+		TreeMap<Integer, String> setusers = new TreeMap<Integer, String>();
 		
 		Game game;
 		game = games.get(getServer() + " " + channel);
@@ -322,17 +334,25 @@ public class WordGameBot extends PircBot {
 			return;
 		}
 		
-		// TODO Sort the users based on words left (descending)
+		// The users that have words left to set, are sorted in order before the string gets created that will list them		
 		for(User user : game.users) {
-			setwords += user.words.size();
+			setwords += user.wordobjs.size(); // Also calculate the total of set words
 			if(user.wordsLeft > 0) {
-				availablewords += user.nick + " (" + user.wordsLeft + ") ";
+				setusers.put(user.wordsLeft, user.nick);
+			}
+		}		
+		Integer key = setusers.lastKey();
+		while(true) {
+			availablewords = availablewords + setusers.get(key) + " (" + key + ") ";
+			key = setusers.lowerKey(key);
+			if(key == null) {
+				break;
 			}
 		}
 		
 		sendMessage(channel, sender + ": " + setwords + " words have been set.");
 		if(!"".equals(availablewords)) {
-			sendMessage(channel, sender + ": The following users can set words: " + availablewords);
+			sendMessageWrapper(channel, null, "The following users can set words: " + availablewords);
 		}
 	}
 	
@@ -487,6 +507,54 @@ public class WordGameBot extends PircBot {
 		}
 	}
 	
+	public void WGPwd(String sender, String login, String hostname, Command command) {
+		if(command.arguments.length == 2) {
+			User user;
+			for(Game game : games.values()) {
+				user = getUser(game, sender, login, hostname);
+				if(user != null) {
+					user.setPassword(command.arguments[1]);
+				}
+			}
+			sendMessage(sender, "Password set for all users matching your connection details.");
+			sendMessage(sender, "Use !wglogin <nick> <password> to login if any of your connection details change.");
+			sendMessage(sender, "If you change your nick, use your old nick in the !wglogin command.");
+		}
+		else {
+			sendMessage(sender, "WGPWD usage: !wgpwd <newpassword>");
+		}
+	}
+	
+	public void WGLogin(String sender, String login, String hostname, Command command) {
+		if(command.arguments.length == 3) {
+			User user;
+			// TODO currently this way, if there are multiple games, the user will get the succes or fail message multiple times.
+			for(Game game : games.values()) {
+				user = getUserByNick(game, command.arguments[1]);
+				if(user != null) {
+					if(user.passwordhash == null) {
+						sendMessage(sender, "You have not set a password! Set a password using !wgpwd with your old connection.");
+						sendMessage(sender, "If you are not capable of setting a password, contact an admin.");
+					}
+					else {
+						if(user.checkPassword(command.arguments[2])) {
+							user.nick = sender;
+							user.login = login;
+							user.hostname = hostname;
+							sendMessage(sender, "Logged in succefully, your connection details have been changed.");
+						}
+						else {
+							sendMessage(sender, "Wrong password!");
+						}
+					}
+				}
+			}
+		}
+		else {
+			sendMessage(sender, "WGLOGIN usage: !wglogin <nick> <password>");
+		}
+	}
+	
 	// Admin commands
 	
 	public void WGAdmin(String sender, String login, String hostname, Command command) {
@@ -545,7 +613,7 @@ public class WordGameBot extends PircBot {
 	public void WGListGames(String sender) {
 		// TODO if no games, say that.
 		for(String servchan : games.keySet()) {
-			sendMessage(sender, servchan + " " + Integer.toHexString(System.identityHashCode(games.get(servchan))));
+			sendMessage(sender, servchan + " " + games.get(servchan).id);
 		}
 	}
 	
@@ -634,17 +702,26 @@ public class WordGameBot extends PircBot {
 					new File(savefolder).mkdirs();
 				}
 				
-				FileOutputStream fos = new FileOutputStream(savefolder + Integer.toHexString(System.identityHashCode(game)));
+				FileOutputStream fos = new FileOutputStream(savefolder + game.id);
 				ObjectOutputStream oos = new ObjectOutputStream(fos);
 				oos.writeObject(game);
 				oos.close();
+				
+				sendMessage(sender, "Game " + game.id + " saved.");
 			}
 			catch(Exception ex) {
 				sendMessage(sender, "Error occured while saving. See stacktrace in STDERR.");
 				ex.printStackTrace();
 			}
 		}
-		sendMessage(sender, "Games saved.");
+		
+		// Wait a second or 2, otherwise the bot will quit before the queue is processed
+		try {
+			Thread.sleep(2000);
+		} catch (Exception e2) {
+			// Do nothing.
+		}
+		
 		disconnect();
 		System.out.println("Exiting, WGSAFEQUIT command issued.");
 		System.exit(0);

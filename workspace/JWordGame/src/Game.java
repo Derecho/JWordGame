@@ -13,9 +13,10 @@ public class Game implements Serializable {
 	private static final long serialVersionUID = 1L;
 	Set<User> users;
 	Integer maxpoints, maxwords;
-	String commandprefix;
+	String id, commandprefix;
 	
 	public Game() {
+		id = Integer.toHexString(System.identityHashCode(this));
 		users = new HashSet<User>();
 		maxpoints = 10; // Maximum amount of points that is rewarded to a guesser.
 		maxwords = 2; // Maximum amount of words that can be set by a user.
@@ -51,22 +52,6 @@ public class Game implements Serializable {
 			}
 		}
 		return null;
-	}
-	
-	public Integer calcGuesserReward(Integer mentions) {
-		// Returns the amount of points to be rewarded to the guesser of the word.
-		// This depends on the amount of mentions the original user had.
-		// This should be changable by the admin commands in the future.
-		return (int)(maxpoints / (mentions/1.5 + 1));
-	}
-	
-	public Integer calcSetterReward(Integer mentions) {
-		if(mentions < maxpoints) {
-			return mentions;
-		}
-		else {
-			return maxpoints;
-		}
 	}
 	
 }
