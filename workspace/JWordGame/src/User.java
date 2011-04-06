@@ -28,6 +28,10 @@ public class User implements Serializable {
 		wordobjs = new HashSet<Word>();
 	}
 	
+	public String toString() {
+		return nick;
+	}
+	
 	public boolean setWord(String word) {
 		if(wordsLeft > 0) {
 			wordobjs.add(new Word(word));
@@ -48,6 +52,11 @@ public class User implements Serializable {
 		
 		for(Word word : wordobjs) {
 			returnstr = returnstr + word + " (" + word.mentions + "), ";
+		}
+		
+		if(wordsLeft > 0) {
+			returnstr = returnstr.substring(0, returnstr.length()-2) + ". You have " + wordsLeft + " word(s) left to set.";
+			return returnstr;
 		}
 		
 		return returnstr.substring(0, returnstr.length()-2);

@@ -30,6 +30,10 @@ public class WordGameBot extends PircBot {
 	final String MSG_DONATED = "Word donated.";
 	final String MSG_DEFAULTCHANNEL = "Your default channel has been set to: ";
 	final String MSG_INVALIDNUMBER = "Please provide a valid number.";
+	final String MSG_NOSUCHUSER = "No such user could be found.";
+	final String MSG_NOSUCHGAME = "No such game could be found.";
+	final String MSG_NOSUCHWORD = "No such word could be found.";
+	final String MSG_WORDRESET = "Word reset";
 	
 	public WordGameBot(HashMap<String, Game> games) {
 		this.games = games;
@@ -60,10 +64,10 @@ public class WordGameBot extends PircBot {
 		
 		Command command;
 		if(game != null) {
-			command = Commands.toCommand(message, game.commandprefix);
+			command = Commands.toCommand(message, game.commandprefix, getNick());
 		}
 		else {
-			command = Commands.toCommand(message, "!");
+			command = Commands.toCommand(message, "!", getNick());
 		}
 		
 		switch(command.command) {
@@ -108,7 +112,7 @@ public class WordGameBot extends PircBot {
 	
 	public void onPrivateMessage(String sender, String login, String hostname, String message) {
 		Command command;
-		command = Commands.toCommand(message, null);
+		command = Commands.toCommand(message, null, null);
 		
 		switch(command.command) {
 		case WG:
@@ -159,6 +163,9 @@ public class WordGameBot extends PircBot {
 				break;
 			case WGSAFEQUIT:
 				WGSafeQuit(sender);
+				break;
+			case WGRESETWORD:
+				WGResetWord(sender, command);
 				break;
 			}
 		}
@@ -220,6 +227,24 @@ public class WordGameBot extends PircBot {
 		
 		return game.getUserByNick(nick);
 	}
+
+	public User getRandomUser(Game game, User exclude) {
+		Random generator = new Random();
+		Integer randomint = generator.nextInt(game.users.size());
+		Integer i = 0;
+		for(User randomuser : game.users) {
+			if(i == randomint) {
+				if(!randomuser.equals(exclude)) {
+					return randomuser;
+				}
+				else {
+					break;
+				}
+			}
+			i++;
+		}
+		return getRandomUser(game, exclude);
+	}
 	
 	public void sendMessageWrapper(String recipient, String nick, String message) {
 		if(nick == null) {
@@ -254,8 +279,8 @@ public class WordGameBot extends PircBot {
 							Integer setterreward = word.calcSetterReward(game.maxpoints);
 							
 							// Inform the guesser about his accomplishment							
-							sendMessage(channel, guesser.nick + ": Congratiulations! You have guessed the word '" + word + "' set by " + setter.nick + "!");
-							sendMessage(channel, "Rewards: " + guesser.nick + " " + guesserreward + " points, " + setter.nick + " " + setterreward + " points.");
+							sendMessage(channel, guesser + ": Congratiulations! You have guessed the word '" + word + "' set by " + setter + "!");
+							sendMessage(channel, "Rewards: " + guesser + " " + guesserreward + " points, " + setter + " " + setterreward + " points.");
 							
 							// Give the guesser and setter a reward
 							guesser.points += guesserreward;
@@ -270,17 +295,8 @@ public class WordGameBot extends PircBot {
 							}
 							else {
 								sendMessageWrapper(channel, guesser.nick, MSG_MAXWORDSREACHED);
-								
-								// TODO Make a much more efficient method for the below code.
-								Random generator = new Random();
-								Integer randomint = generator.nextInt();
-								Integer i = 0;
-								for(User randomuser : game.users) {
-									if(i == randomint) {
-										randomuser.wordsLeft++;
-										break;
-									}
-								}
+								User randomuser = getRandomUser(game, guesser);
+								sendMessageWrapper(channel, null, "Word given to: " + randomuser);
 							}
 						}
 					}
@@ -318,7 +334,7 @@ public class WordGameBot extends PircBot {
 	}
 	
 	public void WGPoints(String channel, User user) {
-		sendMessage(channel, user.nick + ": You have " + user.points + " points.");
+		sendMessage(channel, user + ": You have " + user.points + " points.");
 	}
 	
 	public void WGStatus(String channel, String sender) {
@@ -450,9 +466,14 @@ public class WordGameBot extends PircBot {
 		if(user.wordsLeft > 0) {
 			if(command.arguments.length == 2) {
 				User recipient = getUserByNick(game, command.arguments[1]);
-				user.wordsLeft--;
-				recipient.wordsLeft++;
-				sendMessage(channel, MSG_DONATED);
+				if(recipient == null) {
+					sendMessageWrapper(channel, user.nick, MSG_NOSUCHUSER);
+				}
+				else {
+					user.wordsLeft--;
+					recipient.wordsLeft++;
+					sendMessage(channel, MSG_DONATED);
+				}
 			}
 			else {
 				sendMessage(channel, "WGDONATE usage: !wgdonate <user>");
@@ -612,8 +633,13 @@ public class WordGameBot extends PircBot {
 	
 	public void WGListGames(String sender) {
 		// TODO if no games, say that.
-		for(String servchan : games.keySet()) {
-			sendMessage(sender, servchan + " " + games.get(servchan).id);
+		if(games.isEmpty()) {
+			sendMessage(sender, "There are no games running.");
+		}
+		else {
+			for(String servchan : games.keySet()) {
+				sendMessage(sender, servchan + " " + games.get(servchan).id);
+			}
 		}
 	}
 	
@@ -624,14 +650,14 @@ public class WordGameBot extends PircBot {
 				User user = getUserByNick(game, command.arguments[2]);
 				if(user != null) {
 					user.wordsLeft++;
-					sendMessage(sender, "1 Word given to " + user.nick);
+					sendMessage(sender, "1 Word given to " + user);
 				}
 				else {
-					sendMessage(sender, "No such user could be found.");
+					sendMessage(sender, MSG_NOSUCHUSER);
 				}
 			}
 			else {
-				sendMessage(sender, "No such game could be found.");
+				sendMessage(sender, MSG_NOSUCHGAME);
 			}
 		}
 		else {
@@ -663,7 +689,7 @@ public class WordGameBot extends PircBot {
 				}
 			}
 			else {
-				sendMessage(sender, "No such game.");
+				sendMessage(sender, MSG_NOSUCHGAME);
 			}
 		}
 		else {
@@ -726,4 +752,34 @@ public class WordGameBot extends PircBot {
 		System.out.println("Exiting, WGSAFEQUIT command issued.");
 		System.exit(0);
 	}
+
+	public void WGResetWord(String sender, Command command) {
+		if(command.arguments.length == 4) {
+			Game game = getGame(command.arguments[1]);
+			if(game != null) {	
+				User user = getUserByNick(game, command.arguments[2]);
+				if(user != null) {
+					for(Word word : user.wordobjs) {
+						if(word.word.equals(command.arguments[3])) {
+							user.wordobjs.remove(word);
+							user.wordsLeft++;
+							sendMessage(sender, MSG_WORDRESET);
+							return;
+						}
+					}
+					sendMessage(sender, MSG_NOSUCHWORD);
+				}
+				else {
+					sendMessage(sender, MSG_NOSUCHUSER);
+				}
+			}
+			else {
+				sendMessage(sender, MSG_NOSUCHGAME);
+			}
+		}
+		else {
+			sendMessage(sender, "WGRESETWORD usage: !wgresetword <gameid> <user> <word>");
+		}
+	}
+
 }
