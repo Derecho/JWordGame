@@ -14,6 +14,7 @@ public class Game implements Serializable {
 	Set<User> users;
 	Integer maxpoints, maxwords;
 	String id, commandprefix;
+	Boolean autosave;
 	
 	public Game() {
 		id = Integer.toHexString(System.identityHashCode(this));
@@ -21,6 +22,7 @@ public class Game implements Serializable {
 		maxpoints = 10; // Maximum amount of points that is rewarded to a guesser.
 		maxwords = 2; // Maximum amount of words that can be set by a user.
 		commandprefix = "!";
+		autosave = false;
 	}
 	
 	public boolean addUser(User newuser) {

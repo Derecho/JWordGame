@@ -3,8 +3,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -34,6 +38,7 @@ public class WordGameBot extends PircBot {
 	final String MSG_NOSUCHGAME = "No such game could be found.";
 	final String MSG_NOSUCHWORD = "No such word could be found.";
 	final String MSG_WORDRESET = "Word reset";
+	final String MSG_SAVEERROR = "Error occured while saving. See stacktrace in STDERR.";
 	
 	public WordGameBot(HashMap<String, Game> games) {
 		this.games = games;
@@ -167,6 +172,9 @@ public class WordGameBot extends PircBot {
 			case WGRESETWORD:
 				WGResetWord(sender, command);
 				break;
+			case WGAUTOSAVE:
+				WGAutoSave(sender, command);
+				break;
 			}
 		}
 	}
@@ -271,6 +279,9 @@ public class WordGameBot extends PircBot {
 						if(guesser.equals(setter)) {
 							// User mentioned his own word
 							word.mentions++;
+							if(game.autosave) {
+								saveGame(game);
+							}
 						}
 						else {
 							// User mentioned someone elses word
@@ -298,10 +309,39 @@ public class WordGameBot extends PircBot {
 								User randomuser = getRandomUser(game, guesser);
 								sendMessageWrapper(channel, null, "Word given to: " + randomuser);
 							}
+							
+							if(game.autosave) {
+								saveGame(game);
+							}
 						}
 					}
 				}
 			}
+		}
+	}
+	
+	public boolean saveGame(Game game) {
+		if(game != null) {
+			try {
+				// If the directory does not exist yet, create it
+				if(!new File(savefolder).exists()) {
+					new File(savefolder).mkdirs();
+				}
+				
+				FileOutputStream fos = new FileOutputStream(savefolder + game.id);
+				ObjectOutputStream oos = new ObjectOutputStream(fos);
+				oos.writeObject(game);
+				oos.close();
+				
+				return true;
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+				return false;
+			}
+		}
+		else {
+			return false;
 		}
 	}
 	
@@ -327,6 +367,9 @@ public class WordGameBot extends PircBot {
 		
 		if(game.addUser(new User(sender, login, hostname))) {
 			sendMessageWrapper(channel, sender, MSG_SIGNUPSUCCESS);
+			if(game.autosave) {
+				saveGame(game);
+			}
 		}
 		else {
 			sendMessageWrapper(channel, sender, MSG_SIGNUPFAIL);
@@ -340,7 +383,7 @@ public class WordGameBot extends PircBot {
 	public void WGStatus(String channel, String sender) {
 		Integer setwords = 0;
 		String availablewords = new String();
-		TreeMap<Integer, String> setusers = new TreeMap<Integer, String>();
+		HashMap<String, Integer> setusers = new HashMap<String, Integer>();
 		
 		Game game;
 		game = games.get(getServer() + " " + channel);
@@ -350,25 +393,36 @@ public class WordGameBot extends PircBot {
 			return;
 		}
 		
-		// The users that have words left to set, are sorted in order before the string gets created that will list them		
+		// The users that have words left to set, are added to a seperate map which will be ordered later on		
 		for(User user : game.users) {
 			setwords += user.wordobjs.size(); // Also calculate the total of set words
 			if(user.wordsLeft > 0) {
-				setusers.put(user.wordsLeft, user.nick);
+				setusers.put(user.nick, user.wordsLeft);
 			}
-		}		
-		Integer key = setusers.lastKey();
-		while(true) {
-			availablewords = availablewords + setusers.get(key) + " (" + key + ") ";
-			key = setusers.lowerKey(key);
-			if(key == null) {
-				break;
+		}
+		
+		// Java does not support sorting a map by it's value instead of it's keys, so here comes the solution
+		ArrayList<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>(setusers.entrySet());
+		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+			public int compare(Map.Entry<String, Integer> e1, Map.Entry<String, Integer> e2) {
+				Integer diff = e2.getValue().compareTo(e1.getValue());
+				if(diff == 0) {
+					return e1.getKey().compareTo(e2.getKey());
+				}
+				else {
+					return diff;
+				}
 			}
+		});
+		
+		// Now we create the string that will have the users ordered.
+		for(Map.Entry<String, Integer> setuser : list) {
+			availablewords += setuser.getKey() + " (" + setuser.getValue() + "), ";
 		}
 		
 		sendMessage(channel, sender + ": " + setwords + " words have been set.");
 		if(!"".equals(availablewords)) {
-			sendMessageWrapper(channel, null, "The following users can set words: " + availablewords);
+			sendMessageWrapper(channel, null, "The following users can set words: " + availablewords.substring(0, availablewords.length()-2));
 		}
 	}
 	
@@ -414,6 +468,9 @@ public class WordGameBot extends PircBot {
 		else {
 			if(user.setWord(word)) {
 				sendMessage(sender, MSG_WORDSET);
+				if(game.autosave) {
+					saveGame(game);
+				}
 			}
 			else {
 				sendMessage(sender, MSG_NOUNSETWORDS);
@@ -473,6 +530,9 @@ public class WordGameBot extends PircBot {
 					user.wordsLeft--;
 					recipient.wordsLeft++;
 					sendMessage(channel, MSG_DONATED);
+					if(game.autosave) {
+						saveGame(game);
+					}
 				}
 			}
 			else {
@@ -644,13 +704,17 @@ public class WordGameBot extends PircBot {
 	}
 	
 	public void WGGiveWord(String sender, Command command) {
-		if(command.arguments.length == 3) {
+		if((command.arguments.length == 3) || (command.arguments.length == 4)) {
 			Game game = getGame(command.arguments[1]);
 			if(game != null) {				
 				User user = getUserByNick(game, command.arguments[2]);
 				if(user != null) {
-					user.wordsLeft++;
-					sendMessage(sender, "1 Word given to " + user);
+					Integer amount = 1;
+					if(command.arguments.length == 4) {
+						amount = Integer.parseInt(command.arguments[3]);
+					}
+					user.wordsLeft += amount;
+					sendMessage(sender, amount + " word(s) given to " + user);
 				}
 				else {
 					sendMessage(sender, MSG_NOSUCHUSER);
@@ -661,7 +725,8 @@ public class WordGameBot extends PircBot {
 			}
 		}
 		else {
-			sendMessage(sender, "WGGIVEWORD usage: !wggiveword <gameid> <user>");
+			sendMessage(sender, "WGGIVEWORD usage: !wggiveword <gameid> <user> [amount]");
+			sendMessage(sender, "A negative amount is allowed.");
 			sendMessage(sender, "Use !wglistgames to find the gameid.");
 		}
 	}
@@ -669,27 +734,11 @@ public class WordGameBot extends PircBot {
 	public void WGSave(String sender, Command command) {
 		if(command.arguments.length == 2) {
 			Game game = getGame(command.arguments[1]);
-			if(game != null) {
-				try {
-					// If the directory does not exist yet, create it
-					if(!new File(savefolder).exists()) {
-						new File(savefolder).mkdirs();
-					}
-					
-					FileOutputStream fos = new FileOutputStream(savefolder + command.arguments[1]);
-					ObjectOutputStream oos = new ObjectOutputStream(fos);
-					oos.writeObject(game);
-					oos.close();
-					
-					sendMessage(sender, "Game saved.");
-				}
-				catch(Exception ex) {
-					sendMessage(sender, "Error occured while saving. See stacktrace in STDERR.");
-					ex.printStackTrace();
-				}
+			if(saveGame(game)) {
+				sendMessage(sender, "Game saved.");
 			}
 			else {
-				sendMessage(sender, MSG_NOSUCHGAME);
+				sendMessage(sender, MSG_SAVEERROR);
 			}
 		}
 		else {
@@ -722,22 +771,11 @@ public class WordGameBot extends PircBot {
 	
 	public void WGSafeQuit(String sender) {
 		for(Game game : new HashSet<Game>(games.values())) {
-			try {
-				// If the directory does not exist yet, create it
-				if(!new File(savefolder).exists()) {
-					new File(savefolder).mkdirs();
-				}
-				
-				FileOutputStream fos = new FileOutputStream(savefolder + game.id);
-				ObjectOutputStream oos = new ObjectOutputStream(fos);
-				oos.writeObject(game);
-				oos.close();
-				
+			if(saveGame(game)) {
 				sendMessage(sender, "Game " + game.id + " saved.");
 			}
-			catch(Exception ex) {
-				sendMessage(sender, "Error occured while saving. See stacktrace in STDERR.");
-				ex.printStackTrace();
+			else {
+				sendMessage(sender, MSG_SAVEERROR);
 			}
 		}
 		
@@ -782,4 +820,20 @@ public class WordGameBot extends PircBot {
 		}
 	}
 
+	public void WGAutoSave(String sender, Command command) {
+		if(command.arguments.length == 2) {
+			Game game = getGame(command.arguments[1]);
+			if(game != null) {
+				game.autosave = (game.autosave == false);  // Toggle the autosave bool
+				sendMessage(sender, "Autosaving of game " + game.id + " set to " + game.autosave.toString());
+			}
+			else {
+				sendMessage(sender, MSG_NOSUCHGAME);
+			}
+		}
+		else {
+			sendMessage(sender, "WGAUTOSAVE usage: !wgautosave <gameid>");
+			sendMessage(sender, "Use !wglistgames to find the gameid.");
+		}
+	}
 }
