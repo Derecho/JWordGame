@@ -21,7 +21,7 @@ public class WordGameBot extends PircBot {
 	String adminpass, savefolder;
 	
 	final String MSG_NOTREGISTERED = "You do not have an account yet or have not signed in properly. Use !wgsignup to sign up for an account.";
-	final String MSG_MAXWORDSREACHED = "Uh oh! You seem to have reached the maximum amount of unset words. Your unset word will now be randomly be given to someone.";
+	final String MSG_MAXWORDSREACHED = "Uh oh! You seem to have reached the maximum amount of unset words. Your unset word will now be given to someone else at random.";
 	final String MSG_WGINFO = "This is JWordGame, an irc game based on (accidentally) guessing words set by others. Type !wghelp for more help.";
 	final String MSG_NOGAME = "There is no game in progress on this channel (yet).";
 	final String MSG_WGHELP1 = "Type !wgsignup to signup for the wordgame.";
@@ -290,7 +290,7 @@ public class WordGameBot extends PircBot {
 							Integer setterreward = word.calcSetterReward(game.maxpoints);
 							
 							// Inform the guesser about his accomplishment							
-							sendMessage(channel, guesser + ": Congratiulations! You have guessed the word '" + word + "' set by " + setter + "!");
+							sendMessage(channel, guesser + ": Congratulations! You have guessed the word '" + word + "' set by " + setter + "!");
 							sendMessage(channel, "Rewards: " + guesser + " " + guesserreward + " points, " + setter + " " + setterreward + " points.");
 							
 							// Give the guesser and setter a reward
@@ -303,10 +303,12 @@ public class WordGameBot extends PircBot {
 							// Assign word to guesser or random person
 							if(guesser.wordsLeft <= game.maxwords) {
 								guesser.wordsLeft++;
+								sendMessageWrapper(channel, null, "Word given to: " + guesser);
 							}
 							else {
 								sendMessageWrapper(channel, guesser.nick, MSG_MAXWORDSREACHED);
 								User randomuser = getRandomUser(game, guesser);
+                                randomuser.wordsLeft++;
 								sendMessageWrapper(channel, null, "Word given to: " + randomuser);
 							}
 							
