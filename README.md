@@ -1,6 +1,7 @@
 # JWordGame
 
 JWordGame is an IRC word game bot written in Java.
+The bot makes use of a SSL-patched version of the [PircBot Java IRC framework](http://www.jibble.org/pircbot.php), which comes with the source.
 
 ## Disclaimer
 I've written this program with the goal of learning Java.
