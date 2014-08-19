@@ -13,7 +13,7 @@ public enum Commands {
 		command = commandList[0].toUpperCase();
 		
 		if(prefix == null) {  // Prefix is null, which means the command was sent in a PM.
-			command = command.replaceAll("[^A-Z]", ""); // Remove any prefix the use may have used.
+			command = command.replaceAll("[^A-Z]", ""); // Remove any prefix the user may have used.
 			// Add WG in the beginning of the command if it was left out
 			if(!"WG".equals(command.substring(0,2))) {
 				command = "WG" + command;
