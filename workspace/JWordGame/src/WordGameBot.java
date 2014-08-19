@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import org.jibble.pircbot.*;
@@ -20,6 +21,7 @@ public class WordGameBot extends PircBot {
 	HashMap<String, String> admindetails;
 	String adminpass, savefolder;
 	
+    final Integer MAXMSGLENGTH = 384;
 	final String MSG_NOTREGISTERED = "You do not have an account yet or have not signed in properly. Use !wgsignup to sign up for an account.";
 	final String MSG_MAXWORDSREACHED = "Uh oh! You seem to have reached the maximum amount of unset words. Your unset word will now be given to someone else at random.";
 	final String MSG_WGINFO = "This is JWordGame, an irc game based on (accidentally) guessing words set by others. Type !wghelp for more help.";
@@ -257,12 +259,30 @@ public class WordGameBot extends PircBot {
 	}
 	
 	public void sendMessageWrapper(String recipient, String nick, String message) {
-		if(nick == null) {
-			sendMessage(recipient, message);
-		}
-		else {
-			sendMessage(recipient, nick + ": " + message);
-		}
+        // Split the string first into mutliple lines
+        StringTokenizer token = new StringTokenizer(message, " ");
+        StringBuilder chunk = new StringBuilder(MAXMSGLENGTH);
+        ArrayList<String> lines = new ArrayList<String>();
+        while (token.hasMoreTokens()) {
+            String word = token.nextToken();
+
+            if (chunk.length() + word.length() > MAXMSGLENGTH) {
+                lines.add(chunk.toString());
+                chunk.delete(0, chunk.length());
+            }
+            chunk.append(word + " ");
+        }
+        lines.add(chunk.toString());
+
+        // Send string
+        for(String line : lines) {
+            if(nick == null) {
+                sendMessage(recipient, line);
+            }
+            else {
+                sendMessage(recipient, nick + ": " + line);
+            }
+        }
 	}
 	
 	public void tellNotRegistered(String channel, String sender) {
