@@ -53,7 +53,7 @@ public class WordGameBot extends PircBot {
 		setName("JWG");
 		setLogin("JWordGame");
 		setVersion("JWordGame BETA by Derecho.");
-		setMessageDelay(0);
+		setMessageDelay(500);
 		sendRawLineViaQueue("MODE " + getNick() + " +B");  // A Sector5d.org thing.
 	}
 	
