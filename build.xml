@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<project name="JWordGame" default="jar">
+    <target name="clean" description="remove intermediate files">
+        <delete dir="workspace/JWordGame/bin"/>
+    </target>
+    <target name="clobber" depends="clean" description="remove all artifact files">
+        <delete file="JWordGame.jar"/>
+    </target>
+    <target name="compile" description="compile the Java source code to class files">
+        <mkdir dir="workspace/JWordGame/bin"/>
+        <javac srcdir="workspace/JWordGame/src" destdir="workspace/JWordGame/bin" includeantruntime="false"/>
+    </target>
+    <target name="jar" depends="compile" description="create a Jar file for the application">
+        <jar destfile="JWordGame.jar">
+            <fileset dir="workspace/JWordGame/bin" includes="**/*.class"/>
+            <manifest>
+                <attribute name="Main-Class" value="JWordGame"/>
+            </manifest>
+        </jar>
+    </target>
+</project>
