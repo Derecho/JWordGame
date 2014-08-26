@@ -1,6 +1,7 @@
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -79,7 +80,7 @@ public class User implements Serializable {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA");
 			md.update(passbytes);
-			return md.digest().equals(passwordhash);
+			return Arrays.equals(md.digest(), passwordhash);
 		} catch (NoSuchAlgorithmException ex) {
 			ex.printStackTrace();
 			return false;

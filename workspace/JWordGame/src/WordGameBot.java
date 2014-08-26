@@ -28,9 +28,9 @@ public class WordGameBot extends PircBot {
 	final String MSG_NOGAME = "There is no game in progress on this channel (yet).";
 	final String MSG_WGHELP1 = "Type !wgsignup to sign up for the wordgame, no extra details are necessary.";
 	final String MSG_WGHELP2 = "Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel !wgtop, and PM-only: set listwords pwd login";
-    final String MSG_WGHELPADMIN =  "Available commands: !wgjoin, !wgnewgame, !wglistgames, !wggiveword !wgsave !wgload !wgsafequit !wgresetword !wgautosave";
+    final String MSG_WGHELPADMIN =  "Available commands: !wgjoin, !wgnewgame, !wglistgames, !wggiveword !wgsave !wgload !wgsafequit !wgresetword !wgautosave !wgoverridepwd";
 	final String MSG_SIGNUPSUCCESS = "You have succefully signed up for the wordgame. A PM has been sent to you with additional information.";
-	final String MSG_SIGNUPINTRO = "Welcome to the word game. This game works by setting and guessing certain words during regular IRC conversation. Any sentence you type in a channel participating in the game can cause a set word to be guessed. Both the guesser and setter of the word receive points when this happens, and the guesser will be able to set a word of his own. As a word setter, your goal is to mention your word as often as you can without drawing suspicion. You can get one mention per sentence, actions (/me) are also parsed for mentions. Mentioning your word as part of another word is valid. The more mentions you manage to squeeze in before your word is guessed, the more points you will get when this finally occurs. You can use the listwords command to keep track of your current set words and it will also show you how much mentions you have accumulated so far. This game works best if everyone plays it fairly. Please do not make excessive guessing attempts, copy/paste what others say, or partake in wintrading. You get the most fun by guessing the word during regular conversations or making educated guesses. Now go and guess your first word!";
+	final String MSG_SIGNUPINTRO = "Welcome to the word game. This game works by setting and guessing certain words during regular IRC conversation. Any sentence you type in a channel participating in the game can cause a set word to be guessed. Both the guesser and setter of the word receive points when this happens, and the guesser will be able to set a word of his own. As a word setter, your goal is to mention your word as often as you can without drawing suspicion. You can get one mention per sentence, actions (/me) are also parsed for mentions. Mentioning your word as part of another word is valid. The more mentions you manage to squeeze in before your word is guessed, the more points you will get when this finally occurs. You can use the listwords command to keep track of your current set words and it will also show you how much mentions you have accumulated so far. This game works best if everyone plays it fairly. Please do not make excessive guessing attempts, copy/paste what others say, or partake in wintrading. You get the most fun by guessing the word during regular conversations or making educated guesses. Now go and guess your first word! Tip: Set a password with !wgpwd so you can retrieve your account should your connection details change.";
 	final String MSG_SIGNUPFAIL = "A user with that nickname already exists.";
 	final String MSG_WANTDEFAULTCHANNEL = "If you want to use a default channel, type !wgdefaultchannel in the channel you would like to use as your default channel.";
 	final String MSG_WORDSET = "Word set.";
@@ -140,7 +140,7 @@ public class WordGameBot extends PircBot {
 			WGPwd(sender, login, hostname, command);
 			break;
 		case WGLOGIN:
-			// TODO WGLogin(sender, login, hostname, command);  Doesnt appear to work yet
+			WGLogin(sender, login, hostname, command);
 			break;
 		case WGADMIN:
 			WGAdmin(sender, login, hostname, command);
@@ -179,6 +179,9 @@ public class WordGameBot extends PircBot {
 			case WGAUTOSAVE:
 				WGAutoSave(sender, command);
 				break;
+            case WGOVERRIDEPWD:
+                WGOverridePwd(sender, command);
+                break;
 			}
 		}
 	}
@@ -619,7 +622,10 @@ public class WordGameBot extends PircBot {
 			for(Game game : games.values()) {
 				user = getUser(game, sender, login, hostname);
 				if(user != null) {
-					user.setPassword(command.arguments[1]);
+                    user.setPassword(command.arguments[1]);
+                    if(game.autosave) {
+                        saveGame(game);
+                    }
 				}
 			}
 			sendMessage(sender, "Password set for all users matching your connection details.");
@@ -633,31 +639,49 @@ public class WordGameBot extends PircBot {
 	
 	public void WGLogin(String sender, String login, String hostname, Command command) {
 		if(command.arguments.length == 3) {
-			User user;
-			// TODO currently this way, if there are multiple games, the user will get the succes or fail message multiple times.
-			for(Game game : games.values()) {
-				user = getUserByNick(game, command.arguments[1]);
-				if(user != null) {
-					if(user.passwordhash == null) {
-						sendMessage(sender, "You have not set a password! Set a password using !wgpwd with your old connection.");
-						sendMessage(sender, "If you are not capable of setting a password, contact an admin.");
-					}
-					else {
-						if(user.checkPassword(command.arguments[2])) {
-							user.nick = sender;
-							user.login = login;
-							user.hostname = hostname;
-							sendMessage(sender, "Logged in succefully, your connection details have been changed.");
-						}
-						else {
-							sendMessage(sender, "Wrong password!");
-						}
-					}
-				}
-			}
+            User user;
+            boolean exists = false;
+            boolean setpassword = false;
+            boolean loggedin = false;
+            for(Game game : games.values()) {
+                user = getUserByNick(game, command.arguments[1]);
+                if(user != null) {
+                    exists = true;
+                    if(user.passwordhash != null) {
+                        setpassword = true;
+                        if(user.checkPassword(command.arguments[2])) {
+                            loggedin = true;
+                            user.nick = sender;
+                            user.login = login;
+                            user.hostname = hostname;
+							if(game.autosave) {
+								saveGame(game);
+							}
+                        }
+                    }
+                }
+            }
+
+            if(!exists) {
+                sendMessageWrapper(sender, null, "The given nick does not match an account");
+                return;
+            }
+
+            if(!setpassword) {
+                sendMessageWrapper(sender, null, "You have not set a password! Set a password using !wgpwd with your old connection.");
+                sendMessageWrapper(sender, null, "If you are not capable of setting a password, contact an admin.");
+                return;
+            }
+
+            if(!loggedin) {
+                sendMessageWrapper(sender, null, "Wrong password!");
+                return;
+            }
+
+            sendMessageWrapper(sender, null, "Logged in succefully, your connection details have been changed.");
 		}
 		else {
-			sendMessage(sender, "WGLOGIN usage: !wglogin <nick> <password>");
+			sendMessageWrapper(sender, null, "WGLOGIN usage: !wglogin <nick> <password>");
 		}
 	}
 	
@@ -717,7 +741,6 @@ public class WordGameBot extends PircBot {
 	}
 	
 	public void WGListGames(String sender) {
-		// TODO if no games, say that.
 		if(games.isEmpty()) {
 			sendMessage(sender, "There are no games running.");
 		}
@@ -861,4 +884,23 @@ public class WordGameBot extends PircBot {
 			sendMessage(sender, "Use !wglistgames to find the gameid.");
 		}
 	}
+
+    public void WGOverridePwd(String sender, Command command) {
+		if(command.arguments.length == 3) {
+			User user;
+			for(Game game : games.values()) {
+				user = getUserByNick(game, command.arguments[1]);
+				if(user != null) {
+                    user.setPassword(command.arguments[2]);
+                    if(game.autosave) {
+                        saveGame(game);
+                    }
+				}
+			}
+			sendMessageWrapper(sender, null, "Password set for all users matching this nick.");
+		}
+		else {
+			sendMessageWrapper(sender, null, "WGOVERRIDEPWD usage: !wgoverridepwd <user> <newpassword>");
+		}
+    }
 }
