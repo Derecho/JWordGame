@@ -583,6 +583,8 @@ public class WordGameBot extends PircBot {
 	
 	public void WGTop(String channel, String sender, Game game, Command command) {
 		Integer amount = 3;  // Default is to show the top 3 players
+        // TODO Uncomment for PM usage
+        /*
 		if(command.arguments.length == 2) {
 			try {
 				amount = Integer.parseInt(command.arguments[1]);
@@ -591,6 +593,7 @@ public class WordGameBot extends PircBot {
 				sendMessageWrapper(channel, sender, MSG_INVALIDNUMBER);
 			}
 		}
+        */
 		
 		TreeMap<Integer, String> topusers = new TreeMap<Integer, String>();
 		
@@ -602,14 +605,18 @@ public class WordGameBot extends PircBot {
 			
 			Integer i = 1;
 			Integer key = topusers.lastKey();
+            String topusersStr = new String();
 			while(i <= amount) {
-				sendMessageWrapper(channel, null, i + ". " + topusers.get(key) + " with " + key + " points.");
+                // TODO Use separate lines in a PM, as it is clearer
+				//sendMessageWrapper(channel, null, i + ". " + topusers.get(key) + " with " + key + " points.");
+                topusersStr = topusersStr + i + ". " + topusers.get(key) + " with " + key + " points. | ";
 				key = topusers.lowerKey(key);
 				if(key == null) {
 					break;
 				}
 				i++;
 			}
+            sendMessageWrapper(channel, null, topusersStr.substring(0, topusersStr.length()-3));
 		}
 		else {
 			sendMessageWrapper(channel, sender, MSG_NOGAME);
