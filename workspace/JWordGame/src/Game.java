@@ -12,14 +12,14 @@ public class Game implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	Set<User> users;
-	Integer maxpoints, maxwords;
+	Integer pointsreference, maxwords;
 	String id, commandprefix;
 	Boolean autosave;
 	
 	public Game() {
 		id = Integer.toHexString(System.identityHashCode(this));
 		users = new HashSet<User>();
-		maxpoints = 10; // Maximum amount of points that is rewarded to a guesser.
+		pointsreference = 100; // Amount of total points rewarded after a week
 		maxwords = 2; // Maximum amount of words that can be set by a user.
 		commandprefix = "!";
 		autosave = false;

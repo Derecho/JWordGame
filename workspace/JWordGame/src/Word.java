@@ -23,14 +23,14 @@ public class Word implements Serializable {
 		return word;
 	}
 	
-	public Integer calcSumPoints(Integer points) {
-		// A slightly advanced formula which causes maxpoints set by the Game object to increase when time passes by.
-		long days = (new Date().getTime() - created)/86400000;
-		return (int)(points * (1 + 0.5 * days) * Math.pow(1.15, days));
+	public Integer calcSumPoints(Integer pointsreference) {
+		double days = (new Date().getTime() - created)/86400000.0;
+        return (int)((((pointsreference-10)/Math.log(13)) *
+                Math.log(1 + days + Math.pow(0.1 * days, 2))) + 10);
 	}
 	
 	public Integer calcGuesserReward(Integer points) {
-		return (int)((calcSumPoints(points) / (mentions / 3.5 + 1)));
+		return (int)((calcSumPoints(points) / (mentions / 4.5 + 1)));
 	}
 	
 	public Integer calcSetterReward(Integer points) {

@@ -311,8 +311,8 @@ public class WordGameBot extends PircBot {
 						else {
 							// User mentioned someone elses word
 							// First calculate the rewards
-							Integer guesserreward = word.calcGuesserReward(game.maxpoints);
-							Integer setterreward = word.calcSetterReward(game.maxpoints);
+							Integer guesserreward = word.calcGuesserReward(game.pointsreference);
+							Integer setterreward = word.calcSetterReward(game.pointsreference);
 							
 							// Inform the guesser about his accomplishment							
 							sendMessage(channel, guesser + ": Congratulations! You have guessed the word '" + word + "' set by " + setter + "!");
