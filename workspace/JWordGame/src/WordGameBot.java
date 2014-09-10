@@ -28,7 +28,7 @@ public class WordGameBot extends PircBot {
 	final String MSG_NOGAME = "There is no game in progress on this channel (yet).";
 	final String MSG_WGHELP1 = "Type !wgsignup to sign up for the wordgame, no extra details are necessary.";
 	final String MSG_WGHELP2 = "Other available commands: !wgpoints !wgstatus !wgdonate !wgdefaultchannel !wgtop, and PM-only: set listwords pwd login";
-    final String MSG_WGHELPADMIN =  "Available commands: !wgjoin, !wgnewgame, !wglistgames, !wggiveword !wgsave !wgload !wgsafequit !wgresetword !wgautosave !wgoverridepwd";
+    final String MSG_WGHELPADMIN =  "Available commands: !wgjoin, !wgnewgame, !wglistgames, !wggiveword !wgsave !wgload !wgsafequit !wgresetword !wgautosave !wgoverridepwd !wgresetallpoints";
 	final String MSG_SIGNUPSUCCESS = "You have succefully signed up for the wordgame. A PM has been sent to you with additional information.";
 	final String MSG_SIGNUPINTRO = "Welcome to the word game. This game works by setting and guessing certain words during regular IRC conversation. Any sentence you type in a channel participating in the game can cause a set word to be guessed. Both the guesser and setter of the word receive points when this happens, and the guesser will be able to set a word of his own. As a word setter, your goal is to mention your word as often as you can without drawing suspicion. You can get one mention per sentence, actions (/me) are also parsed for mentions. Mentioning your word as part of another word is valid. The more mentions you manage to squeeze in before your word is guessed, the more points you will get when this finally occurs. You can use the listwords command to keep track of your current set words and it will also show you how much mentions you have accumulated so far. This game works best if everyone plays it fairly. Please do not make excessive guessing attempts, copy/paste what others say, or partake in wintrading. You get the most fun by guessing the word during regular conversations or making educated guesses. Now go and guess your first word! Tip: Set a password with !wgpwd so you can retrieve your account should your connection details change.";
 	final String MSG_SIGNUPFAIL = "A user with that nickname already exists.";
@@ -181,6 +181,9 @@ public class WordGameBot extends PircBot {
 				break;
             case WGOVERRIDEPWD:
                 WGOverridePwd(sender, command);
+                break;
+            case WGRESETALLPOINTS:
+                WGResetAllPoints(sender, command);
                 break;
 			}
 		}
@@ -909,5 +912,23 @@ public class WordGameBot extends PircBot {
 		else {
 			sendMessageWrapper(sender, null, "WGOVERRIDEPWD usage: !wgoverridepwd <user> <newpassword>");
 		}
+    }
+
+    public void WGResetAllPoints(String sender, Command command) {
+		if(command.arguments.length == 2) {
+			Game game = getGame(command.arguments[1]);
+			if(game != null) {	
+                for(User user : game.users) {
+                    user.points = 0;
+                }
+                sendMessageWrapper(sender, null, "All points have been reset to 0.");
+            }
+            else {
+                sendMessageWrapper(sender, null, MSG_NOSUCHGAME);
+            }
+        }
+        else {
+			sendMessageWrapper(sender, null, "WGRESETALLPOINTS usage: !wgresetallpoints <game>");
+        }
     }
 }
