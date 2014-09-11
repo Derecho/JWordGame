@@ -48,15 +48,16 @@ public class User implements Serializable {
         String returnstr = new String();
         
         if(wordobjs.isEmpty()) {
-            return "You haven't set any words.";
+            returnstr = returnstr + "You haven't set any words. ";
         }
         
         for(Word word : wordobjs) {
             returnstr = returnstr + word + " (" + word.mentions + "), ";
         }
+        returnstr = returnstr.substring(0, returnstr.length()-2) + ". ";
         
         if(wordsLeft > 0) {
-            returnstr = returnstr.substring(0, returnstr.length()-2) + ". You have " + wordsLeft + " word(s) left to set.";
+            returnstr = returnstr + "You have " + wordsLeft + " word(s) left to set.";
             return returnstr;
         }
         
