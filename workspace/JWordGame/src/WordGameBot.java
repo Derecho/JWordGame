@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
@@ -302,7 +303,8 @@ public class WordGameBot extends PircBot {
     public void parseLine(User guesser, Game game, String channel, String message) {
         if(guesser != null) {           
             for(User setter : game.users) {             
-                for(Word word : setter.wordobjs) {
+                Set<Word> words = new HashSet<Word>(setter.wordobjs);
+                for(Word word : words) {
                     if(message.contains(word.word)) {
                         if(guesser.equals(setter)) {
                             // User mentioned his own word
