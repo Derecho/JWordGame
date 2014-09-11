@@ -3,6 +3,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 
@@ -13,7 +14,8 @@ public class User implements Serializable {
      */
     private static final long serialVersionUID = 1L;
     String nick, login, hostname, defaultchannel;
-    Integer points, wordsLeft;
+    Integer points;
+    LinkedList<UnsetWord> unsetwordobjs;
     Set<Word> wordobjs;
     byte[] passwordhash;
 
@@ -25,7 +27,7 @@ public class User implements Serializable {
         defaultchannel = null;
         passwordhash = null;
         points = 0;
-        wordsLeft = 0;
+        unsetwordobjs = new LinkedList<UnsetWord>();
         wordobjs = new HashSet<Word>();
     }
     
@@ -33,10 +35,22 @@ public class User implements Serializable {
         return nick;
     }
     
+    public void addUnsetWord() {
+        unsetwordobjs.add(new UnsetWord());
+    }
+
+    public void removeUnsetWord() {
+        unsetwordobjs.removeFirst();
+    }
+
+    public boolean hasUnsetWords() {
+        return !unsetwordobjs.isEmpty();
+    }
+
     public boolean setWord(String word) {
-        if(wordsLeft > 0) {
+        if(hasUnsetWords()) {
             wordobjs.add(new Word(word));
-            wordsLeft--;
+            removeUnsetWord();
             return true;
         }
         else {
@@ -56,8 +70,8 @@ public class User implements Serializable {
         }
         returnstr = returnstr.substring(0, returnstr.length()-2) + ". ";
         
-        if(wordsLeft > 0) {
-            returnstr = returnstr + "You have " + wordsLeft + " word(s) left to set.";
+        if(hasUnsetWords()) {
+            returnstr = returnstr + "You have " + unsetwordobjs.size() + " word(s) left to set.";
             return returnstr;
         }
         

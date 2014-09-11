@@ -331,14 +331,14 @@ public class WordGameBot extends PircBot {
                             setter.wordobjs.remove(word);
                             
                             // Assign word to guesser or random person
-                            if(guesser.wordsLeft <= game.maxwords) {
-                                guesser.wordsLeft++;
+                            if(guesser.unsetwordobjs.size() <= game.maxwords) {
+                                guesser.addUnsetWord();
                                 sendMessageWrapper(channel, null, "Word given to: " + guesser);
                             }
                             else {
                                 sendMessageWrapper(channel, guesser.nick, MSG_MAXWORDSREACHED);
                                 User randomuser = getRandomUser(game, guesser);
-                                randomuser.wordsLeft++;
+                                randomuser.addUnsetWord();
                                 sendMessageWrapper(channel, null, "Word given to: " + randomuser);
                             }
                             
@@ -429,8 +429,8 @@ public class WordGameBot extends PircBot {
         // The users that have words left to set, are added to a seperate map which will be ordered later on        
         for(User user : game.users) {
             setwords += user.wordobjs.size(); // Also calculate the total of set words
-            if(user.wordsLeft > 0) {
-                setusers.put(user.nick, user.wordsLeft);
+            if(user.hasUnsetWords()) {
+                setusers.put(user.nick, user.unsetwordobjs.size());
             }
         }
         
@@ -553,15 +553,15 @@ public class WordGameBot extends PircBot {
     }
     
     public void WGDonate(String channel, User user, Game game, Command command) {
-        if(user.wordsLeft > 0) {
+        if(user.hasUnsetWords()) {
             if(command.arguments.length == 2) {
                 User recipient = getUserByNick(game, command.arguments[1]);
                 if(recipient == null) {
                     sendMessageWrapper(channel, user.nick, MSG_NOSUCHUSER);
                 }
                 else {
-                    user.wordsLeft--;
-                    recipient.wordsLeft++;
+                    user.removeUnsetWord();
+                    recipient.addUnsetWord();
                     sendMessage(channel, MSG_DONATED);
                     if(game.autosave) {
                         saveGame(game);
@@ -773,7 +773,11 @@ public class WordGameBot extends PircBot {
                     if(command.arguments.length == 4) {
                         amount = Integer.parseInt(command.arguments[3]);
                     }
-                    user.wordsLeft += amount;
+                    Integer left = amount;
+                    while(left > 0) {
+                        user.addUnsetWord();
+                        left--;
+                    }
                     sendMessage(sender, amount + " word(s) given to " + user);
                 }
                 else {
@@ -860,7 +864,7 @@ public class WordGameBot extends PircBot {
                     for(Word word : user.wordobjs) {
                         if(word.word.equals(command.arguments[3])) {
                             user.wordobjs.remove(word);
-                            user.wordsLeft++;
+                            user.addUnsetWord();
                             sendMessage(sender, MSG_WORDRESET);
                             return;
                         }
