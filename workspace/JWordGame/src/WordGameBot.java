@@ -623,7 +623,14 @@ public class WordGameBot extends PircBot {
         
         if(game != null) {
             for(User user : game.users) {
-                topusers.put(user.points, user.nick);
+                if(topusers.containsKey(user.points)) {
+                    String drawusers = topusers.get(user.points);
+                    drawusers = drawusers + ", " + user.nick;
+                    topusers.put(user.points, drawusers);
+                }
+                else {
+                    topusers.put(user.points, user.nick);
+                }
             }
             sendMessageWrapper(channel, sender, "Top " + amount + " users in this game:");
             
