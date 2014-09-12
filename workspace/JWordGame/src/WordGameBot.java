@@ -606,9 +606,8 @@ public class WordGameBot extends PircBot {
     }
     
     public void WGTop(String channel, String sender, Game game, Command command) {
-        Integer amount = 3;  // Default is to show the top 3 players
-        // TODO Uncomment for PM usage
-        /*
+        Integer defaultamount = 3;
+        Integer amount = defaultamount;
         if(command.arguments.length == 2) {
             try {
                 amount = Integer.parseInt(command.arguments[1]);
@@ -617,7 +616,6 @@ public class WordGameBot extends PircBot {
                 sendMessageWrapper(channel, sender, MSG_INVALIDNUMBER);
             }
         }
-        */
         
         TreeMap<Integer, String> topusers = new TreeMap<Integer, String>();
         
@@ -632,22 +630,33 @@ public class WordGameBot extends PircBot {
                     topusers.put(user.points, user.nick);
                 }
             }
-            sendMessageWrapper(channel, sender, "Top " + amount + " users in this game:");
+            if(amount == defaultamount) {
+                sendMessageWrapper(channel, sender, "Top " + amount + " users in this game:");
+            }
+            else {
+                sendMessageWrapper(channel, sender, "A PM has been sent to you with the top " + amount + " users in this game.");
+            }
             
             Integer i = 1;
             Integer key = topusers.lastKey();
             String topusersStr = new String();
             while(i <= amount) {
-                // TODO Use separate lines in a PM, as it is clearer
-                //sendMessageWrapper(channel, null, i + ". " + topusers.get(key) + " with " + key + " points.");
-                topusersStr = topusersStr + i + ". " + topusers.get(key) + " with " + key + " points. | ";
+                if(amount == defaultamount) {
+                    topusersStr = topusersStr + i + ". " + topusers.get(key) + " with " + key + " points. | ";
+                }
+                else {
+                    sendMessageWrapper(sender, null, i + ". " + topusers.get(key) + " with " + key + " points.");
+                }
                 key = topusers.lowerKey(key);
                 if(key == null) {
                     break;
                 }
                 i++;
             }
-            sendMessageWrapper(channel, null, topusersStr.substring(0, topusersStr.length()-3));
+
+            if(amount == defaultamount) {
+                sendMessageWrapper(channel, null, topusersStr.substring(0, topusersStr.length()-3));
+            }
         }
         else {
             sendMessageWrapper(channel, sender, MSG_NOGAME);
