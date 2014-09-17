@@ -389,7 +389,7 @@ public class WordGameBot extends PircBot {
                     User randomuser = getRandomUser(game, user);
                     user.removeUnsetWord();
                     randomuser.addUnsetWord();
-                    sendMessageWrapper(user.nick, null, "You've hold on to an unset word for 24 hours. The unset word has now been redistributed.");
+                    sendMessageWrapper(user.nick, null, "You've held on to an unset word for 24 hours. The unset word has now been redistributed.");
                     sendMessageWrapper(randomuser.nick, null, "You've been given a redistributed word that was held on to for too long.");
                 }
             }
