@@ -106,8 +106,7 @@ public class WordGameBot extends PircBot {
             else { tellNotRegistered(channel, sender);  }
             break;
         case WGDEFAULTCHANNEL:
-            if(user != null) { WGDefaultChannel(channel, user, command);    }
-            else { tellNotRegistered(channel, sender);  }
+            WGDefaultChannel(channel, sender, login, hostname);
             break;
         case WGTOP:
             WGTop(channel, sender, game, command);
@@ -494,19 +493,26 @@ public class WordGameBot extends PircBot {
                 if(loopuser != null) {
                     user = loopuser;
                     game = games.get(getServer() + " " + user.defaultchannel);
-                    word = command.arguments[1];
                     
-                    if(game == null) {
-                        sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
-                        sendMessage(sender, "Otherwise, use: !wgset <#channel> <word>");
-                        return;
+                    if(game != null) {
+                        user = game.getUser(sender, login, hostname);
+                        break;
                     }
                 }
             }
+
+            if(game == null) {
+                sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
+                sendMessage(sender, "Otherwise, use: !wglistwords <#channel>");
+                return;
+            }
+
             if(user == null) {
                 tellNotRegistered(sender, null);
                 return;
             }
+
+            word = command.arguments[1];
         }
         else {
             sendMessage(sender, "WGSET usage: !wgset <#channel> <word>");
@@ -544,13 +550,19 @@ public class WordGameBot extends PircBot {
                 if(loopuser != null) {
                     user = loopuser;
                     game = games.get(getServer() + " " + user.defaultchannel);
-                    if(game == null) {
-                        sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
-                        sendMessage(sender, "Otherwise, use: !wglistwords <#channel>");
-                        return;
+                    if(game != null) {
+                        user = game.getUser(sender, login, hostname);
+                        break;
                     }
                 }
             }
+
+            if(game == null) {
+                sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
+                sendMessage(sender, "Otherwise, use: !wglistwords <#channel>");
+                return;
+            }
+
             if(user == null) {
                 tellNotRegistered(sender, null);
                 return;
@@ -561,7 +573,7 @@ public class WordGameBot extends PircBot {
             sendMessage(sender, MSG_WANTDEFAULTCHANNEL);
             return;
         }
-        
+
         // We got all the needed data, continue
         if(user == null) {
             tellNotRegistered(sender, null);
@@ -596,13 +608,22 @@ public class WordGameBot extends PircBot {
         }
     }
     
-    public void WGDefaultChannel(String channel, User user, Command command) {
-        String defaultchannel = channel;
-        if(command.arguments.length == 2) {
-            defaultchannel = command.arguments[1];
+    public void WGDefaultChannel(String channel, String sender, String login, String hostname) {
+        User user;
+        boolean changed = false;
+        for(Game game : games.values()) {
+            user = getUser(game, sender, login, hostname);
+            if(user != null) {
+                user.defaultchannel = channel;
+                changed = true;
+            }
         }
-        user.defaultchannel = defaultchannel;
-        sendMessageWrapper(channel, user.nick, MSG_DEFAULTCHANNEL + defaultchannel);
+        if(changed) {
+            sendMessageWrapper(channel, sender, MSG_DEFAULTCHANNEL + channel);
+        }
+        else {
+            tellNotRegistered(channel, sender);
+        }
     }
     
     public void WGTop(String channel, String sender, Game game, Command command) {
